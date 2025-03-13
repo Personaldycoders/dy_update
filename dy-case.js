@@ -516,6 +516,7 @@ const cpanelnya = `
 ┣╾ .delsrv  
 ┣╾ .listusr  
 ┣╾ .delusr  
+┣╾ .delallsrv 1,2,3  
 ┣╾ .createadmin/adp
 ┗━━━━━━━━━━━━━━━━━━┛  
 
@@ -550,6 +551,7 @@ const cpnelnyav2 = `
 ┣╾ .delsrv-v2
 ┣╾ .listusr-v2
 ┣╾ .delusr-v2
+┣╾ .delallsrv-v2 1,2,3  
 ┣╾ .createadmin-v2/adp-v2
 ┗━━━━━━━━━━━━━━━━━━┛  
 
@@ -1878,24 +1880,14 @@ case 'setdomain-v2': {
 
 async function updateConfigValue(key, value, m) {
     const settingsPath = path.join(__dirname, 'config.js');
-    
 
     try {
         let settings = fs.readFileSync(settingsPath, 'utf8');
-
-async function updateConfigValue(key, value, m) {
-    const settingsPath = path.join(__dirname, 'config.js');
-
-    try {
-        let settings = fs.readFileSync(settingsPath, 'utf8');
-
-       
         let regex = new RegExp(`(global\\.${key}\\s*=\\s*)(true|false)(?=;|\\n|$)`, 'g');
 
         if (regex.test(settings)) {
             settings = settings.replace(regex, `$1${value};`);
             fs.writeFileSync(settingsPath, settings, 'utf8');
-
             Reply(`✅ *Welcome berhasil diubah ke ${value.toUpperCase()}!*`);
         } else {
             Reply(`❌ *Setting ${key} tidak ditemukan di config.js!*`);
@@ -1904,8 +1896,9 @@ async function updateConfigValue(key, value, m) {
         console.error("❌ ERROR:", err);
         Reply('❌ Gagal memperbarui setting!');
     }
+}
 
-case 'setwelcome': {
+case 'setwelcome': { 
     if (!siowner) return forbiden(mess.owner);
     if (!text) return Reply('❌ Masukkan `on` atau `off`!\nContoh: `.welcome on` atau `.welcome off`');
 
@@ -1915,7 +1908,6 @@ case 'setwelcome': {
     await updateConfigValue('welcome', value, m);
     break;
 }
-
 
 case "uninstallpanel": {
     if (!text || !text.split("|")) return Reply("ipvps|pwvps")
@@ -2909,6 +2901,120 @@ case 'delsrv': {
     Reply(message);
 }
 break;
+case 'delallsrv': {
+    if (!siowner) return forbiden(mess.owner);
+    
+    let excludeList = args[0] ? args[0].split(',').map(id => id.trim()) : [];
+    
+    try {
+        let res = await fetch(domain + "/api/application/servers", {
+            "method": "GET",
+            "headers": {
+                "Accept": "application/json",
+                "Authorization": "Bearer " + apikey,
+            }
+        });
+        
+        if (!res.ok) return Reply("Gagal mengambil daftar server.");
+        
+        let data = await res.json();
+        let servers = data.data.map(srv => srv.attributes.id.toString());
+        
+        let toDelete = servers.filter(id => !excludeList.includes(id));
+        
+        if (toDelete.length === 0) return Reply("Tidak ada server yang bisa dihapus.");
+
+        let failed = [];
+        let success = [];
+        
+        for (let srv of toDelete) {
+            try {
+                let del = await fetch(domain + "/api/application/servers/" + srv, {
+                    "method": "DELETE",
+                    "headers": {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + apikey,
+                    }
+                });
+
+                if (del.ok) {
+                    success.push(srv);
+                } else {
+                    failed.push(srv);
+                }
+            } catch (error) {
+                failed.push(srv);
+            }
+        }
+        
+        let message = '*Hasil Penghapusan Server:*\n\n';
+        if (success.length > 0) message += `✅ Berhasil dihapus: ${success.join(', ')}\n`;
+        if (failed.length > 0) message += `❌ Gagal dihapus: ${failed.join(', ')}\n`;
+
+        Reply(message);
+    } catch (error) {
+        Reply("Terjadi kesalahan saat mengambil data server.");
+    }
+}
+break;
+case 'delallsrv-v2': {
+    if (!siowner) return forbiden(mess.owner);
+    
+    let excludeList = args[0] ? args[0].split(',').map(id => id.trim()) : [];
+    
+    try {
+        let res = await fetch(cpanelv2 + "/api/application/servers", {
+            "method": "GET",
+            "headers": {
+                "Accept": "application/json",
+                "Authorization": "Bearer " + siptakey2,
+            }
+        });
+        
+        if (!res.ok) return Reply("Gagal mengambil daftar server.");
+        
+        let data = await res.json();
+        let servers = data.data.map(srv => srv.attributes.id.toString());
+        
+        let toDelete = servers.filter(id => !excludeList.includes(id));
+        
+        if (toDelete.length === 0) return Reply("Tidak ada server yang bisa dihapus.");
+
+        let failed = [];
+        let success = [];
+        
+        for (let srv of toDelete) {
+            try {
+                let del = await fetch(cpanelv2 + "/api/application/servers/" + srv, {
+                    "method": "DELETE",
+                    "headers": {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + siptakey2,
+                    }
+                });
+
+                if (del.ok) {
+                    success.push(srv);
+                } else {
+                    failed.push(srv);
+                }
+            } catch (error) {
+                failed.push(srv);
+            }
+        }
+        
+        let message = '*Hasil Penghapusan Server:*\n\n';
+        if (success.length > 0) message += `✅ Berhasil dihapus: ${success.join(', ')}\n`;
+        if (failed.length > 0) message += `❌ Gagal dihapus: ${failed.join(', ')}\n`;
+
+        Reply(message);
+    } catch (error) {
+        Reply("Terjadi kesalahan saat mengambil data server.");
+    }
+}
+break;
 
 
 case 'delsrv-v2': {
@@ -3093,15 +3199,6 @@ case 'delowner': {
     if (!text) return Reply("Masukkan nomor yang mau dihapus! Contoh: .delowner 628xxx");
 
     let number = text.replace(/[^0-9]/g, ''); 
-    
-    let number = text.replace(/[^0-9]/g, ''); 
-
-    let index = global.rowner.findIndex(([num]) => num === number);
-    if (index === -1) return Reply("Nomor ini bukan owner!");
-
-    global.rowner.splice(index, 1);
-
-    let number = text.replace(/[^0-9]/g, ''); 
 
     let index = global.rowner.findIndex(([num]) => num === number);
     if (index === -1) return Reply("Nomor ini bukan owner!");
@@ -3115,7 +3212,7 @@ case 'delowner': {
     fs.writeFileSync(configPath, configContent, 'utf-8');
 
     Reply(`✅ Berhasil menghapus ${number} dari daftar owner!`);
-    
+
     let jid = number + "@s.whatsapp.net";
     await dycoders.sendMessage(jid, {
         image: { url: thumbnail },
@@ -3141,24 +3238,12 @@ case 'addowner': {
 
     let number = text.replace(/[^0-9]/g, '');
 
-    
-    let number = text.replace(/[^0-9]/g, ''); // Bersihin selain angka
-
-    let number = text.replace(/[^0-9]/g, '');
-
-    
     if (global.rowner.some(([num]) => num === number)) {
         return Reply("Nomor ini sudah jadi owner!");
     }
-   
-    global.rowner.push([number, "dycoders.xyz", true]);
-   
-    // Tambahin owner baru ke global.rowner
+
     global.rowner.push([number, "dycoders.xyz", true]);
 
-   
-    global.rowner.push([number, "dycoders.xyz", true]);
-   
     let configPath = './config.js';
     let configContent = fs.readFileSync(configPath, 'utf-8');
     let newRowner = `global.rowner = ${JSON.stringify(global.rowner, null, 4)};`;
@@ -3185,7 +3270,6 @@ case 'addowner': {
 
     break;
 }
-
 
 case 'addiprules': { 
     if (!isPremium(m.sender)) return Reply("Fitur ini hanya untuk pengguna premium!"); 
