@@ -1904,7 +1904,7 @@ async function updateConfigValue(key, value, m) {
         console.error("❌ ERROR:", err);
         Reply('❌ Gagal memperbarui setting!');
     }
-}
+
 case 'setwelcome': {
     if (!siowner) return forbiden(mess.owner);
     if (!text) return Reply('❌ Masukkan `on` atau `off`!\nContoh: `.welcome on` atau `.welcome off`');
