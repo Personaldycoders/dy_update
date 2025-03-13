@@ -27,17 +27,4 @@ npm install
 ```bash
 npm start
 ```
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
-<<<<<<< HEAD
->>>>>>> 0600e0b (update dulu)
 
- 
-=======
->>>>>>> 0482cc8 (cihuy update)
-<<<<<<< HEAD
-=======
->>>>>>> 859216f (cihuy update)
->>>>>>> 0600e0b (update dulu)
