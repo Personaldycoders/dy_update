@@ -1,4 +1,4 @@
-![michelle!_20250309_132609_0000](https://github.com/user-attachments/assets/4f894c25-4481-4ee3-91d7-e5b2bf6b8b43)
+![michelle!_20250309_132609_0000](https://files.catbox.moe/qur5ed.jpg)
 
 
 
