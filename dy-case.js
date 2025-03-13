@@ -1806,21 +1806,16 @@ async function replaceValueInSettings(key, value, m) {
 
     try {
         let settings = fs.readFileSync(settingsPath, 'utf8');
-<<<<<<< HEAD
+        
         console.log("🔍 DEBUG: File config.js terbaca:", settings);
 
         
-=======
-<<<<<<< HEAD
         console.log("🔍 DEBUG: File config.js terbaca:", settings); // Cek apakah file terbaca
 
-        // Regex perbaikan agar bisa tangkap semua format
-=======
+        
         console.log("🔍 DEBUG: File config.js terbaca:", settings);
 
         
->>>>>>> 859216f (cihuy update)
->>>>>>> 0600e0b (update dulu)
         let regex = new RegExp(`(global\\.${key}\\s*=\\s*)(["'\`]?)(.*?)(\\2)(?=;|\\n|$)`, 'g');
 
         if (regex.test(settings)) {
@@ -1830,13 +1825,7 @@ async function replaceValueInSettings(key, value, m) {
 
             Reply(`✅ *${key} berhasil diperbarui!*\n➡️ *${value}*`);
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-            // 🚀 Restart bot biar setting baru langsung ke-load (opsional)
-=======
->>>>>>> 859216f (cihuy update)
->>>>>>> 0600e0b (update dulu)
+
         } else {
             Reply(`❌ *${key} tidak ditemukan di config.js!*`);
         }
@@ -1887,26 +1876,19 @@ case 'setdomain-v2': {
     break;
 }
 
-<<<<<<< HEAD
 async function updateConfigValue(key, value, m) {
     const settingsPath = path.join(__dirname, 'config.js');
-=======
-<<<<<<< HEAD
->>>>>>> 0600e0b (update dulu)
+    
 
     try {
         let settings = fs.readFileSync(settingsPath, 'utf8');
 
-<<<<<<< HEAD
-=======
-=======
 async function updateConfigValue(key, value, m) {
     const settingsPath = path.join(__dirname, 'config.js');
 
     try {
         let settings = fs.readFileSync(settingsPath, 'utf8');
 
->>>>>>> 0600e0b (update dulu)
        
         let regex = new RegExp(`(global\\.${key}\\s*=\\s*)(true|false)(?=;|\\n|$)`, 'g');
 
@@ -1933,10 +1915,7 @@ case 'setwelcome': {
     await updateConfigValue('welcome', value, m);
     break;
 }
-<<<<<<< HEAD
-=======
->>>>>>> 859216f (cihuy update)
->>>>>>> 0600e0b (update dulu)
+
 
 case "uninstallpanel": {
     if (!text || !text.split("|")) return Reply("ipvps|pwvps")
@@ -3113,22 +3092,8 @@ case 'delowner': {
     if (!siowner) return forbiden(mess.owner);
     if (!text) return Reply("Masukkan nomor yang mau dihapus! Contoh: .delowner 628xxx");
 
-<<<<<<< HEAD
     let number = text.replace(/[^0-9]/g, ''); 
-=======
-<<<<<<< HEAD
-    let number = text.replace(/[^0-9]/g, ''); // Bersihin selain angka
->>>>>>> 0600e0b (update dulu)
-
-    let index = global.rowner.findIndex(([num]) => num === number);
-    if (index === -1) return Reply("Nomor ini bukan owner!");
-
-    global.rowner.splice(index, 1);
-
-<<<<<<< HEAD
-=======
-    // 🔹 Simpan perubahan ke config.js
-=======
+    
     let number = text.replace(/[^0-9]/g, ''); 
 
     let index = global.rowner.findIndex(([num]) => num === number);
@@ -3136,8 +3101,13 @@ case 'delowner': {
 
     global.rowner.splice(index, 1);
 
->>>>>>> 859216f (cihuy update)
->>>>>>> 0600e0b (update dulu)
+    let number = text.replace(/[^0-9]/g, ''); 
+
+    let index = global.rowner.findIndex(([num]) => num === number);
+    if (index === -1) return Reply("Nomor ini bukan owner!");
+
+    global.rowner.splice(index, 1);
+
     let configPath = './config.js';
     let configContent = fs.readFileSync(configPath, 'utf-8');
     let newRowner = `global.rowner = ${JSON.stringify(global.rowner, null, 4)};`;
@@ -3145,14 +3115,7 @@ case 'delowner': {
     fs.writeFileSync(configPath, configContent, 'utf-8');
 
     Reply(`✅ Berhasil menghapus ${number} dari daftar owner!`);
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-
-    // 🔹 Kirim Notifikasi ke User yang Dihapus
-=======
->>>>>>> 859216f (cihuy update)
->>>>>>> 0600e0b (update dulu)
+    
     let jid = number + "@s.whatsapp.net";
     await dycoders.sendMessage(jid, {
         image: { url: thumbnail },
@@ -3176,41 +3139,26 @@ case 'addowner': {
     if (!siowner) return forbiden(mess.owner);
     if (!text) return Reply("Masukkan nomor! Contoh: .addowner 628xxx");
 
-<<<<<<< HEAD
     let number = text.replace(/[^0-9]/g, '');
 
     
-=======
-<<<<<<< HEAD
     let number = text.replace(/[^0-9]/g, ''); // Bersihin selain angka
 
-    // Cek kalau nomor sudah ada di daftar owner
-=======
     let number = text.replace(/[^0-9]/g, '');
 
     
->>>>>>> 859216f (cihuy update)
->>>>>>> 0600e0b (update dulu)
     if (global.rowner.some(([num]) => num === number)) {
         return Reply("Nomor ini sudah jadi owner!");
     }
-
-<<<<<<< HEAD
    
     global.rowner.push([number, "dycoders.xyz", true]);
    
-=======
-<<<<<<< HEAD
     // Tambahin owner baru ke global.rowner
     global.rowner.push([number, "dycoders.xyz", true]);
 
-    // 🔹 Simpan perubahan ke config.js
-=======
    
     global.rowner.push([number, "dycoders.xyz", true]);
    
->>>>>>> 859216f (cihuy update)
->>>>>>> 0600e0b (update dulu)
     let configPath = './config.js';
     let configContent = fs.readFileSync(configPath, 'utf-8');
     let newRowner = `global.rowner = ${JSON.stringify(global.rowner, null, 4)};`;
@@ -3219,13 +3167,6 @@ case 'addowner': {
 
     Reply(`✅ Berhasil menambahkan ${number} sebagai owner bot!`);
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-    // 🔹 Kirim Notifikasi ke User yang Ditambahkan
-=======
->>>>>>> 859216f (cihuy update)
->>>>>>> 0600e0b (update dulu)
     let jid = number + "@s.whatsapp.net";
     await dycoders.sendMessage(jid, {
         image: { url: thumbnail },
