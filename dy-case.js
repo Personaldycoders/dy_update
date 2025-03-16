@@ -22,7 +22,6 @@ const {
 const crypto = require('crypto');
 const { Client } = require('ssh2');
 const { TelegraPh, UploadFileUgu } = require('./start//lib/uploader');
-const scdl = require('soundcloud-downloader').default;
 
 const uploadImage = require('./start/lib/uploadImage.js')
 const { 
@@ -113,6 +112,56 @@ const formatp = (bytes) => {
     if (bytes === 0) return '0 Byte';
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+};
+
+const snapinst = {
+    async app(url) {
+       const { data } = await axios.get('https://snapinst.app/');
+       const $ = cheerio.load(data);
+       const form = new FormData();
+    
+       form.append('url', url);
+       form.append('action', 'post');
+       form.append('lang', '');
+       form.append('cf-turnstile-response', '');
+       form.append('token', $('input[name=token]').attr('value'));
+    
+       const headers = {
+         ...form.getHeaders(),
+         'accept': '*/*',
+         'accept-language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+         'sec-ch-ua': '"Not A(Brand";v="8", "Chromium";v="132"',
+         'sec-ch-ua-mobile': '?1',
+         'sec-ch-ua-platform': '"Android"',
+         'sec-fetch-dest': 'empty',
+         'sec-fetch-mode': 'cors',
+         'sec-fetch-site': 'same-origin',
+         'Referer': 'https://snapinst.app/',
+         'Referrer-Policy': 'strict-origin-when-cross-origin'
+       };
+    
+       const jsbejad = await axios.post('https://snapinst.app/action2.php', form, { headers });
+       const ayok = new Function('callbuk', jsbejad.data.replace('eval', 'callbuk'));
+       
+       const html = await new Promise((resolve, reject) => {
+           ayok(t=>{
+             const code = t.split(".innerHTML = ")[1].split("; document.")[0];
+             resolve(eval(code));
+           });
+       });
+       
+       const _ = cheerio.load(html);
+       const res = {
+           avatar: _('.row img:eq(0)').attr('src'),
+           username: _('.row div.left:eq(0)').text().trim(),
+           urls: []
+       };
+       _('.row .download-item').each((i, e)=>{
+           res.urls.push(_(e).find('.download-bottom a').attr('href'));
+       });
+       
+       return res;
+    },
 };
 
 
@@ -670,6 +719,7 @@ const allmenu = `
 │ 📁 .mediafire url  
 │ 📁 .git urlrepo  
 │ ▶️ .yt url  
+│ 🎥 .ig/.instagram url  
 └──────────────┘  
 
 ┌─〔 🎧 PLAY MENU 〕─┐  
@@ -3174,91 +3224,6 @@ case 'splay': {
     uselimit(sender);
     break;
 }
-case 'soundcloud': {
-    if (limitnya < 1) return m.reply(mess.limit);
-    
-    if (!text) {
-        return m.reply(`Masukan judul lagu\n\n*Contoh:* ${prefix + command} Neck Deep - December`);
-    }
-
-    const path = './soundcloud.mp3';
-
-    const scrapeSoundCloud = async (query) => {
-        try {
-            const url = `https://m.soundcloud.com/search?q=${encodeURIComponent(query)}`;
-            const { data } = await axios.get(url);
-            const $ = cheerio.load(data);
-
-            let results = [];
-            $('.List_VerticalList__2uQYU li').each((index, element) => {
-                const title = $(element).find('.Cell_CellLink__3yLVS').attr('aria-label');
-                const musicUrl = 'https://m.soundcloud.com' + $(element).find('.Cell_CellLink__3yLVS').attr('href');
-                if (title && musicUrl) {
-                    results.push({ title, url: musicUrl });
-                }
-            });
-
-            return results.slice(0, 5);
-        } catch (error) {
-            return [];
-        }
-    };
-
-    try {
-        const searchResults = await scrapeSoundCloud(text);
-        if (searchResults.length === 0) {
-            return m.reply('⚠️ Tidak ada hasil ditemukan.');
-        }
-
-        const targetUrl = searchResults[0].url;
-        await dycoders.sendMessage(m.chat, { react: { text: '🕜', key: m.key } });
-
-        const stream = await scdl.download(targetUrl);
-        const writeStream = fs.createWriteStream(path);
-        stream.pipe(writeStream);
-
-        writeStream.on('finish', async () => {
-            const buffer = fs.readFileSync(path);
-
-            const audioMessage = {
-                audio: buffer,
-                mimetype: 'audio/mpeg',
-                ptt: false,
-                contextInfo: {
-                    mentions: participants.map(a => a.id),
-                    externalAdReply: {
-                        showAdAttribution: true,
-                        mediaType: 1,
-                        mediaUrl: '',
-                        title: `⇆ㅤ ||◁ㅤ❚❚ㅤ▷||ㅤ ↻`,
-                        body: `   ━━━━⬤──────────   `,
-                        sourceUrl: 'https://m.soundcloud.com',
-                        thumbnailUrl: `https://telegra.ph/file/662564e95a8fe4c21cb33.jpg`,
-                        renderLargerThumbnail: true,
-                    },
-                },
-            };
-
-            // Kirim pesan dalam format JSON utuh
-            await dycoders.sendMessage(m.chat, audioMessage, { quoted: m });
-            await dycoders.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
-
-            fs.unlinkSync(path);
-        });
-
-        writeStream.on('error', async () => {
-            await dycoders.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
-            m.reply('⚠️ Gagal menyimpan file audio.');
-        });
-    } catch (error) {
-        await dycoders.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
-        return m.reply('⚠️ Terjadi kesalahan saat memproses permintaan.');
-    }
-
-    uselimit();
-    break;
-}
-
 case 'editdns': {
     if (!isPremium(m.sender)) return Reply("Fitur ini hanya untuk pengguna premium!");
     if (!text.includes('|')) return Reply('Format salah! Contoh: .editdns id_dns|yes/no');
@@ -4163,6 +4128,34 @@ await dycoders.groupParticipantsUpdate(m.chat, [users], 'remove')
 await Reply(`Succes Kick anomali`)
 }
 break
+
+case "ig": case 'instagram' : {
+    if (!text) return Reply("Masukkan URL Instagram!");
+    
+    try {
+        const result = await snapinst.app(text);
+        if (result.urls.length === 0) return Reply("Gagal mendapatkan media!");
+        
+        let caption = `👤 *Username:* ${result.username}\n🔗 *Link:* ${text}`;
+        if (result.avatar) caption += ``;
+        
+        for (let i = 0; i < result.urls.length; i++) {
+            await dycoders.sendMessage(m.chat, { 
+                video: { url: result.urls[i] }, 
+                caption: caption 
+            }, { quoted: m });
+        }
+    } catch (err) {
+        console.error(err);
+        m.reply("Terjadi kesalahan saat mengambil data.");
+    }
+}
+break;
+
+
+
+
+
 
 case "tt": case "tiktok": {
   if (limitnya < 1) return Reply(mess.limit)
