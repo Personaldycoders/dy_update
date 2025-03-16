@@ -22,6 +22,8 @@ const {
 const crypto = require('crypto');
 const { Client } = require('ssh2');
 const { TelegraPh, UploadFileUgu } = require('./start//lib/uploader');
+const scdl = require('soundcloud-downloader').default;
+
 const uploadImage = require('./start/lib/uploadImage.js')
 const { 
   default:
@@ -83,7 +85,7 @@ const groupName = groupMetadata.subject || "";
 const participants = groupMetadata.participants || [];
 const groupAdmins = participants.filter(v => v.admin !== null).map(v => v.id);
 const groupMembers = participants.map(v => v.id);
-
+const { islamai } = require('./start/lib/islamai');
     const isBotGroupAdmins = isGroup ? groupAdmins.includes(botNumber) : false;
     const isBotAdmins = groupAdmins.includes(botNumber);
     const isAdmins = isGroup ? groupAdmins.includes(m.sender) : false;
@@ -482,6 +484,7 @@ _bot ini dikembangkan oleh_ dycoders.xyz
 ║ 🌐 *.subdomain2*= mycloudpremiumid.xyz  
 ║ 🌐 *.subdomain3*= serverku-pterodactyl.web.id
 ║ 🌐 *.subdomain4*= pterodactyl-host.xyz
+║ 🌐 *.subdomain5*= node-i.my.id
 ║ 🛠️ .*editdns* id|yes/no  
 ║ 📌 *.addiprules* note|ipvps  
 ║ 🌩 *.autocf* iddomain|ipvps
@@ -560,107 +563,118 @@ const cpnelnyav2 = `
 
 
 const allmenu = ` 
-╭━━━〔 🤖 𝐃𝐘_𝐍𝐄𝐓 𝐁𝐎𝐓 〕━━━⬣  
-│ 👋 _Hallo ${m.pushName}, selamat datang!_  
+
+┌─〔 🤖 DY_NET BOT 〕─┐  
+│ 👋 Halo ${m.pushName}, selamat datang!  
 │ 🛠 Saya adalah *Dy_Net Bot*  
 │ 🔧 Dikembangkan oleh *dycoders.xyz*  
-╰━━━━━━━━━━━━━━━━⬣  
+└──────────────┘  
 
-╭━━━〔 🏷 𝐈𝐍𝐅𝐎 𝐁𝐎𝐓 〕━━━⬣  
+┌─〔 🏷 INFO BOT 〕─┐  
 │ 📛 *Botname:* Dy_Net  
 │ 🔢 *Version:* 1.1.0  
 │ 🌐 *Mode:* ${mode}  
 │ 🧑‍💻 *Creator:* dycoders.xyz  
-╰━━━━━━━━━━━━━━━━⬣  
+└──────────────┘  
 
-╭━━━〔 👑 𝐎𝐖𝐍𝐄𝐑 𝐌𝐄𝐍𝐔 〕━━━⬣  
+┌─〔 👑 OWNER MENU 〕─┐  
 │ ✨ .addprem [user]  
 │ ✨ .delprem [user]  
-│ ✨ .addreseller [number]
-│ ✨ .delreseller [number]
-│ ✨ .self
-│ ✨ .public
-│ ✨ .deletedns1 id
-│ ✨ .deletedns2 id
-│ ✨ .setdomain
-│ ✨ .setplta
-│ ✨ .setpltc
-│ ✨ .setplta-v2
-│ ✨ .setpltc-v2
-│ ✨ .setdomain-v2
-│ ✨ .ambilsw
-│ ✨ .cekidgc
-│ ✨ .addlimit
-│ ✨ .setppbot
-│ ✨ .getcase
-│ ✨ .setbotname
-│ ✨ .delsampah
-│ ✨ .addowner nomer
-│ ✨ .setwelcome on/off
-╰━━━━━━━━━━━━━━━━⬣  
+│ ✨ .addreseller [number]  
+│ ✨ .delreseller [number]  
+│ ✨ .self  
+│ ✨ .public  
+│ ✨ .deletedns1 id  
+│ ✨ .deletedns2 id  
+│ ✨ .setdomain  
+│ ✨ .setdomain-v2  
+│ ✨ .setplta  
+│ ✨ .setpltc  
+│ ✨ .setplta-v2  
+│ ✨ .setpltc-v2  
+│ ✨ .ambilsw  
+│ ✨ .cekidgc  
+│ ✨ .addlimit  
+│ ✨ .setppbot  
+│ ✨ .getcase  
+│ ✨ .setbotname  
+│ ✨ .delsampah  
+│ ✨ .addowner [nomer]  
+│ ✨ .setwelcome [on/off]  
+└──────────────┘  
 
-╭━━━〔 💾 𝐜𝐏𝐚𝐧𝐞𝐥 𝐌𝐞𝐧𝐮 〕━━━⬣  
-│ 🗂 .1gb 
-│ 🗂 .2gb
-│ 🗂 .3gb
-│ 🗂 .4gb
-│ 🗂 .5gb
-│ 🗂 .6gb
-│ 🗂 .7gb
-│ 🗂 .8gb
-│ 🗂 .9gb
-│ 🗂 .10gb
-│ 🗂 .unli
-│ 💽 .listsrv
-│ 🗑 .delsrv id
-│ 🗑 .delusr id
-│ 👤 .listusr
-│ 👤 .adp
-╰━━━━━━━━━━━━━━━━⬣  
+┌─〔 💾 CPANEL MENU 〕─┐  
+│ 🗂 .1gb  
+│ 🗂 .2gb  
+│ 🗂 .3gb  
+│ 🗂 .4gb  
+│ 🗂 .5gb  
+│ 🗂 .6gb  
+│ 🗂 .7gb  
+│ 🗂 .8gb  
+│ 🗂 .9gb  
+│ 🗂 .10gb  
+│ 🗂 .unli  
+│ 💽 .listsrv  
+│ 🗑 .delsrv id  
+│ 🗑 .delusr id  
+│ 👤 .listusr  
+│ 👤 .adp  
+└──────────────┘  
 
-╭━━━〔 🖥 𝐏𝐚𝐧𝐞𝐥 𝐌𝐞𝐧𝐮 〕━━━⬣  
-│ 🚀 .installpanel [ipvps|pwvps|panel.com|node.com]  
-│ 🚀 .startwings ipvps|pwvps|token_node
-│ 🐣 .ambileggs khusus eggs botwa
-╰━━━━━━━━━━━━━━━━⬣  
+┌─〔 🖥 PANEL MENU 〕─┐  
+│ 🚀 .installpanel [ipvps|pwvps|panel.com]  
+│ 🚀 .startwings ipvps|pwvps|token_node  
+│ 🐣 .ambileggs (khusus eggs botwa)  
+└──────────────┘  
 
-╭━━━〔 ☁️ 𝐂𝐥𝐨𝐮𝐝𝐟𝐥𝐚𝐫𝐞 〕━━━⬣  
-│ 🌐 .subdomain1 > cloud-ku.my.id
-│ 🌐 .subdomain2 > mycloudpremium.xyz
-│ 🌐 .subdomain3 > serverku-pterodactyl.web.id
-│ 🌐 .subdomain4 > pterodactyl-host.xyz
-│ 📝 .editdns id|yes/no
+┌─〔 ☁️ CLOUDFLARE MENU 〕─┐  
+│ 🌐 .subdomain1 > cloud-ku.my.id  
+│ 🌐 .subdomain2 > mycloudpremium.xyz  
+│ 🌐 .subdomain3 > serverku-pterodactyl.web.id  
+│ 🌐 .subdomain4 > pterodactyl-host.xyz  
+│ 🌐 .subdomain5 > node-i.my.id  
+│ 📝 .editdns id|yes/no  
 │ 📌 .addiprules note|ipvps  
-│ 🌩️ .autocf iddomain|ipvps
-╰━━━━━━━━━━━━━━━━⬣  
+│ 🌩️ .autocf iddomain|ipvps  
+└──────────────┘  
 
-╭━━━〔 👥 𝐆𝐫𝐮𝐩 𝐌𝐞𝐧𝐮 〕━━━⬣  
+┌─〔 👥 GROUP MENU 〕─┐  
 │ 🚪 .kick [user]  
 │ 🔓 .gc buka|tutup|info|member  
 │ ⬆️ .promote [user]  
 │ ⬇️ .demote [user]  
-│ 🏷️ .tagall 
+│ 🏷️ .tagall  
 │ 👻 .hidetag [text]  
 │ 🔗 .linkgc  
 │ ♻️ .resetlinkgc  
-╰━━━━━━━━━━━━━━━━⬣
+└──────────────┘  
 
+┌─〔 🔧 TOOLS MENU 〕─┐  
+│ 📝 .bratvid teks  
+│ 📝 .brat teks  
+│ 📝 .sticker image/video  
+│ 📄 .post-paste  
+│ 🔗 .tourl img/video  
+│ 📚 .totalfitur  
+│ 🔍 .searchsubdo  
+│ 😎 .qc teks/reply  
+│ 📼 .toimg reply sticker  
+│ 💡 .hd/.remini reply img  
+│ 💳 .ceklimit  
+└──────────────┘  
 
-╭━━━〔 🔧 𝐎𝐓𝐇𝐄𝐑 𝐓𝐎𝐎𝐋𝐒〕━━━⬣  
-│ 📝 .bratvid teks
-│ 📝 .brat teks
-│ 📝 .sticker image/video
-│ 🎥 .tiktok
-│ 📁 .mediafire url
-│ 📁 .git urlrepo
-│ 📄 .post-paste
-│ 🔗 .tourl img/video
-│ 📚 .totalfitur
-│ 🔍 .searchsubdo
-│ 😎 .qc teks/reply
-│ 📼 .toimg reply sticker
-│ 💡 .hd/.remini reply img
-╰━━━━━━━━━━━━━━━━⬣
+┌─〔 💾 DOWNLOAD MENU 〕─┐  
+│ 🎥 .tiktok  
+│ 📁 .mediafire url  
+│ 📁 .git urlrepo  
+│ ▶️ .yt url  
+└──────────────┘  
+
+┌─〔 🎧 PLAY MENU 〕─┐  
+│ 🎥 .play judul
+│ 🎶 .splay judul
+└──────────────┘  
 
 
 
@@ -713,6 +727,7 @@ Reply(`Reply gambar/video/gif dengan caption ${command}\nBatas durasi video 1-9 
 break
 
 case 'bratvideo': case 'bratvid': {
+  if (limitnya < 1) return Reply(mess.limit)
 const axios = require('axios');
 const { execSync } = require('child_process')
   if (!text) return Reply(`Contoh: ${prefix+command} halo saya dycoders.xyz`)
@@ -759,6 +774,7 @@ const { execSync } = require('child_process')
     Reply('Terjadi kesalahan')
   }
 }
+uselimit(sender);
 break
 
 case 'createadmin': case 'adp': {  
@@ -2801,6 +2817,28 @@ if (!isReseller(sender)) return Reply("Fitur ini hanya untuk reseller!");
 
 
 
+case 'islamai': {
+
+  
+    if (!text) {
+        return Reply('Masukkan pertanyaan yang ingin diajukan!\nContoh: !islamai Apa hukum sholat Jumat?');
+    }
+
+    try {
+        const response = await islamai(text.trim());
+        if (response && response.result) {
+            Reply(`🕌 *Islam AI said*\n\n${response.result}`);
+        } else {
+          Reply('⚠️ Tidak dapat mendapatkan respons dari Islam AI. Coba lagi nanti.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Reply('⚠️ Terjadi kesalahan saat memproses permintaan. Coba lagi nanti.');
+    }
+    break;
+}
+
+
 
 case 'get': {
   const axios = require('axios');
@@ -3058,45 +3096,165 @@ case 'delsrv-v2': {
 }
 break;
 
+case 'splay': {
+  if (limitnya < 1) return Reply(mess.limit)
+    if (!text) return Reply("Silakan masukkan nama lagu atau URL Spotify untuk diunduh!");
 
-case 'soundcloud': {
-    if (!text) return Reply("Masukkan teks pencarian atau URL SoundCloud!");
+    const Spotify = require('./start/lib/spotify.js');
 
-    const SoundCloud = require('./start/lib/soundcloud');
+    const axios = require('axios');
 
     try {
-        let downloadUrl;
+        await dycoders.sendMessage(m.chat, { react: { text: '⌛', key: m.key } })
+        await dycoders.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
+        await dycoders.sendMessage(m.chat, { react: { text: '⌛', key: m.key } })
+        await dycoders.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
+        await dycoders.sendMessage(m.chat, { react: { text: '⌛', key: m.key } })
+        await dycoders.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
+        await dycoders.sendMessage(m.chat, { react: { text: '⌛', key: m.key } })
+        await dycoders.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
 
-        if (text.includes('soundcloud.com')) {
-            Reply('🔄 Sedang mendownload audio...');
-            let downloadData = await SoundCloud.download(text);
-            if (!downloadData || !downloadData.download) return Reply("Gagal mendapatkan link download!");
-            downloadUrl = downloadData.download;
+        const result = await Spotify.searchAndDownload(text);
+
+        if (result.status) {
+            const data = result.data;
+
+            const audioPath = path.resolve(__dirname, `./tmp/${data.title}.mp3`);
+            const writer = fs.createWriteStream(audioPath);
+            const response = await axios({
+                url: data.download,
+                method: 'GET',
+                responseType: 'stream',
+            });
+
+            response.data.pipe(writer);
+
+            writer.on('finish', async () => {
+                await dycoders.sendMessage(
+                    m.chat,
+                    {
+                        audio: { url: audioPath },
+                        mimetype: 'audio/mpeg',
+                        ptt: false,
+                        contextInfo: {
+                            externalAdReply: {
+                                showAdAttribution: true,
+                                mediaType: 1,
+                                mediaUrl: data.url,
+                                title: `🎵 ${data.title}`,
+                                body: `🎤 ${data.artist}\n💿 ${data.album || "Tidak ada album"}\n📅 ${data.releaseDate || "Tidak diketahui"}`,
+                                sourceUrl: data.url,
+                                thumbnailUrl: data.cover,
+                                renderLargerThumbnail: true,
+                            },
+                        },
+                    },
+                    { quoted: fswtag }
+                );
+
+                await dycoders.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+                fs.unlinkSync(audioPath);
+            });
+
+            writer.on('error', async (error) => {
+                await dycoders.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
+                m.reply(`Gagal mengunduh file audio: ${error.message}`);
+            });
         } else {
-            Reply('🔍 Sedang mencari lagu...');
-            let results = await SoundCloud.search(text);
-            if (!Array.isArray(results) || results.length === 0) return Reply("Tidak ditemukan hasil!");
+            await dycoders.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
+            m.reply(`Gagal mengambil data: ${result.msg}`);
+        }
+    } catch (error) {
+        await dycoders.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
+        console.error("Error:", error);
+        m.reply("Terjadi kesalahan saat mengambil data dari Spotify: " + error.message);
+    }
+    uselimit(sender);
+    break;
+}
+case 'soundcloud': {
+    if (limitnya < 1) return m.reply(mess.limit);
+    
+    if (!text) {
+        return m.reply(`Masukan judul lagu\n\n*Contoh:* ${prefix + command} Neck Deep - December`);
+    }
 
-            let firstTrack = results[0];
-            Reply(`🎵 *Mendownload:* ${firstTrack.title}\n🔗 ${firstTrack.url}`);
+    const path = './soundcloud.mp3';
 
-            let downloadData = await SoundCloud.download(firstTrack.url);
-            if (!downloadData || !downloadData.download) return Reply("Gagal mendapatkan link download!");
-            downloadUrl = downloadData.download;
+    const scrapeSoundCloud = async (query) => {
+        try {
+            const url = `https://m.soundcloud.com/search?q=${encodeURIComponent(query)}`;
+            const { data } = await axios.get(url);
+            const $ = cheerio.load(data);
+
+            let results = [];
+            $('.List_VerticalList__2uQYU li').each((index, element) => {
+                const title = $(element).find('.Cell_CellLink__3yLVS').attr('aria-label');
+                const musicUrl = 'https://m.soundcloud.com' + $(element).find('.Cell_CellLink__3yLVS').attr('href');
+                if (title && musicUrl) {
+                    results.push({ title, url: musicUrl });
+                }
+            });
+
+            return results.slice(0, 5);
+        } catch (error) {
+            return [];
+        }
+    };
+
+    try {
+        const searchResults = await scrapeSoundCloud(text);
+        if (searchResults.length === 0) {
+            return m.reply('⚠️ Tidak ada hasil ditemukan.');
         }
 
-        console.log("Final Download URL:", downloadUrl); // Debugging
+        const targetUrl = searchResults[0].url;
+        await dycoders.sendMessage(m.chat, { react: { text: '🕜', key: m.key } });
 
-        await dycoders.sendMessage(m.chat, {
-            audio: { url: downloadUrl },
-            mimetype: 'audio/mp4',
-            ptt: false
-        }, { quoted: m });
+        const stream = await scdl.download(targetUrl);
+        const writeStream = fs.createWriteStream(path);
+        stream.pipe(writeStream);
 
+        writeStream.on('finish', async () => {
+            const buffer = fs.readFileSync(path);
+
+            const audioMessage = {
+                audio: buffer,
+                mimetype: 'audio/mpeg',
+                ptt: false,
+                contextInfo: {
+                    mentions: participants.map(a => a.id),
+                    externalAdReply: {
+                        showAdAttribution: true,
+                        mediaType: 1,
+                        mediaUrl: '',
+                        title: `⇆ㅤ ||◁ㅤ❚❚ㅤ▷||ㅤ ↻`,
+                        body: `   ━━━━⬤──────────   `,
+                        sourceUrl: 'https://m.soundcloud.com',
+                        thumbnailUrl: `https://telegra.ph/file/662564e95a8fe4c21cb33.jpg`,
+                        renderLargerThumbnail: true,
+                    },
+                },
+            };
+
+            // Kirim pesan dalam format JSON utuh
+            await dycoders.sendMessage(m.chat, audioMessage, { quoted: m });
+            await dycoders.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+            fs.unlinkSync(path);
+        });
+
+        writeStream.on('error', async () => {
+            await dycoders.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
+            m.reply('⚠️ Gagal menyimpan file audio.');
+        });
     } catch (error) {
-        console.error("Error:", error);
-        Reply("Terjadi kesalahan saat mengambil data dari SoundCloud.");
+        await dycoders.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
+        return m.reply('⚠️ Terjadi kesalahan saat memproses permintaan.');
     }
+
+    uselimit();
     break;
 }
 
@@ -3473,7 +3631,17 @@ case 'subdomain3': {
     }
     break;
 }
-case 'subdowings': {
+case "ceklimit": {
+    let limit = getLimit(m.sender);
+    let pesan = `💳 *Limit Anda:* ${limit}`;
+    dycoders.sendMessage(m.chat, { text: pesan }, { quoted: m });
+    break;
+}
+
+
+
+
+case 'subdomain5': {
     if (!isPremium(m.sender)) return Reply("Fitur ini hanya untuk pengguna premium!");
     if (!text.includes('|')) return Reply('Format salah! Contoh: .subdowings sub|123.456.789.10|yes');
 
@@ -3996,6 +4164,7 @@ await Reply(`Succes Kick anomali`)
 break
 
 case "tt": case "tiktok": {
+  if (limitnya < 1) return Reply(mess.limit)
 if (!text) return Reply(example("url"))
 
 await tiktokDl(q).then(async (result) => {
@@ -4044,7 +4213,10 @@ await dycoders.sendMessage(m.chat, {video: {url: urlVid.url}, mimetype: 'video/m
 }
 }).catch(e => console.log(e))
 await dycoders.sendMessage(m.chat, {react: {text: '', key: m.key}})
+
+
 }
+uselimit(sender);
 break
 case "pin": case "pinterest": {
     if (!text) return Reply(example("anime dark"));
@@ -4108,6 +4280,7 @@ case "pin": case "pinterest": {
         console.log(err);
         Reply("Terjadi kesalahan saat mengambil data dari Pinterest.");
     }
+    
 }
 break;
 
@@ -4198,7 +4371,7 @@ case 'zptv': {
     break;
 }
 case 'buka': case 'rvo': {
-    if (!m.quoted || !m.quoted.message) return Reply("Reply ke gambar atau video!");
+    
 
     let type = Object.keys(m.quoted.message || {})[0]; 
     let quotedType = m.quoted.message[type];
@@ -4358,6 +4531,454 @@ case 'delsampah': {
     await sleep(2000);
     await dycoders.sendMessage(m.chat, { react: { text: '✅', key: tuts.key },});
   });
+}
+break;
+
+case 'yt': {
+  if (limitnya < 1) return Reply(mess.limit)
+  await dycoders.sendMessage(m.chat, {react: {text: '🕖', key: m.key}})
+    const axios = require('axios');
+
+
+    const savetube = {
+        api: {
+            base: "https://media.savetube.me/api",
+            cdn: "/random-cdn",
+            info: "/v2/info",
+            download: "/download"
+        },
+        headers: {
+            'accept': '*/*',
+            'content-type': 'application/json',
+            'origin': 'https://yt.savetube.me',
+            'referer': 'https://yt.savetube.me/',
+            'user-agent': 'Postify/1.0.0'
+        },
+        formats: ['144', '240', '360', '480', '720', '1080', 'mp3'],
+
+        crypto: {
+            hexToBuffer: (hexString) => {
+                const matches = hexString.match(/.{1,2}/g);
+                return Buffer.from(matches.join(''), 'hex');
+            },
+
+            decrypt: async (enc) => {
+                try {
+                    const secretKey = 'C5D58EF67A7584E4A29F6C35BBC4EB12';
+                    const data = Buffer.from(enc, 'base64');
+                    const iv = data.slice(0, 16);
+                    const content = data.slice(16);
+                    const key = savetube.crypto.hexToBuffer(secretKey);
+
+                    const decipher = crypto.createDecipheriv('aes-128-cbc', key, iv);
+                    let decrypted = decipher.update(content);
+                    decrypted = Buffer.concat([decrypted, decipher.final()]);
+
+                    return JSON.parse(decrypted.toString());
+                } catch (error) {
+                    throw new Error(`${error.message}`);
+                }
+            }
+        },
+
+        isUrl: (str) => {
+            try {
+                new URL(str);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        },
+
+        youtube: (url) => {
+            if (!url) return null;
+            const a = [
+                /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+                /youtu\.be\/([a-zA-Z0-9_-]{11})/
+            ];
+            for (let b of a) {
+                if (b.test(url)) return url.match(b)[1];
+            }
+            return null;
+        },
+
+        request: async (endpoint, data = {}, method = 'post') => {
+            try {
+                const { data: response } = await axios({
+                    method,
+                    url: `${endpoint.startsWith('http') ? '' : savetube.api.base}${endpoint}`,
+                    data: method === 'post' ? data : undefined,
+                    params: method === 'get' ? data : undefined,
+                    headers: savetube.headers
+                });
+                return {
+                    status: true,
+                    code: 200,
+                    data: response
+                };
+            } catch (error) {
+                return {
+                    status: false,
+                    code: error.response?.status || 500,
+                    error: error.message
+                };
+            }
+        },
+
+        getCDN: async () => {
+            const response = await savetube.request(savetube.api.cdn, {}, 'get');
+            if (!response.status) return response;
+            return {
+                status: true,
+                code: 200,
+                data: response.data.cdn
+            };
+        },
+
+        download: async (link, format) => {
+            if (!link) {
+                return {
+                    status: false,
+                    code: 400,
+                    error: "Masukkan link YouTube!"
+                };
+            }
+
+            if (!savetube.isUrl(link)) {
+                return {
+                    status: false,
+                    code: 400,
+                    error: "Masukkan link YouTube yang valid!"
+                };
+            }
+
+            if (!format || !savetube.formats.includes(format)) {
+                return {
+                    status: false,
+                    code: 400,
+                    error: "Format tidak valid!",
+                    available_fmt: savetube.formats
+                };
+            }
+
+            const id = savetube.youtube(link);
+            if (!id) {
+                return {
+                    status: false,
+                    code: 400,
+                    error: "Gagal mengekstrak video ID dari link!"
+                };
+            }
+
+            try {
+                const cdnx = await savetube.getCDN();
+                if (!cdnx.status) return cdnx;
+                const cdn = cdnx.data;
+
+                const result = await savetube.request(`https://${cdn}${savetube.api.info}`, {
+                    url: `https://www.youtube.com/watch?v=${id}`
+                });
+                if (!result.status) return result;
+                const decrypted = await savetube.crypto.decrypt(result.data.data);
+
+                const dl = await savetube.request(`https://${cdn}${savetube.api.download}`, {
+                    id: id,
+                    downloadType: format === 'mp3' ? 'audio' : 'video',
+                    quality: format === 'mp3' ? '128' : format,
+                    key: decrypted.key
+                });
+
+                return {
+                    status: true,
+                    code: 200,
+                    result: {
+                        title: decrypted.title || "Tidak diketahui",
+                        type: format === 'mp3' ? 'audio' : 'video',
+                        format: format,
+                        thumbnail: decrypted.thumbnail || `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+                        download: dl.data.data.downloadUrl,
+                        id: id,
+                        key: decrypted.key,
+                        duration: decrypted.duration,
+                        quality: format === 'mp3' ? '128' : format,
+                        downloaded: dl.data.data.downloaded || false
+                    }
+                };
+
+            } catch (error) {
+                return {
+                    status: false,
+                    code: 500,
+                    error: error.message
+                };
+            }
+        }
+    };
+
+    if (!text) {
+        return m.reply(`❌ Masukkan link YouTube atau keyword untuk mencari video.`);
+    }
+
+    let isAudio = text.includes("--audio");
+    let isVideo = text.includes("--video");
+    let isJson = text.includes("--json");
+
+    let videoUrl = text.startsWith("http") ? text : `https://www.youtube.com/results?search_query=${encodeURIComponent(text)}`;
+
+    let format = isAudio ? 'mp3' : '720';
+
+    try {
+        let res = await savetube.download(videoUrl, format);
+        if (!res.status) return m.reply(`❌ *Error:* ${res.error}`);
+
+        let { title, download, type, thumbnail } = res.result;
+
+        let infoMessage = `🎵 *YouTube Downloader*\n\n📌 *Judul:* ${title}\n📺 *Tipe:* ${type}\n🔗 *Download:* ${download}`;
+
+        if (isJson) {
+            return dycoders.sendMessage(m.chat, { text: JSON.stringify(res.result, null, 2) }, { quoted: m });
+        }
+
+        if (!isAudio && !isVideo) {
+            return dycoders.sendMessage(m.chat, {
+                image: { url: thumbnail },
+                caption: infoMessage,
+                footer: "DyBot",
+                buttons: [
+                    { buttonId: `.yt ${videoUrl} --audio`, buttonText: { displayText: "🎵 Download Audio" }, type: 1 },
+                    { buttonId: `.yt ${videoUrl} --video`, buttonText: { displayText: "📹 Download Video" }, type: 1 },
+                    { buttonId: `.yt ${videoUrl} --json`, buttonText: { displayText: "📜 Lihat JSON" }, type: 1 }
+                ],
+                headerType: 4,
+                viewOnce: true,
+            }, { quoted: m });
+        }
+
+        if (isAudio) {
+            return dycoders.sendMessage(m.chat, { audio: { url: download }, mimetype: "audio/mpeg" }, { quoted: m });
+        } else if (isVideo) {
+            return dycoders.sendMessage(m.chat, { video: { url: download }, mimetype: "video/mp4" }, { quoted: m });
+
+
+  }
+    }
+  
+  catch (e) {
+      m.reply(`❌ Gagal mengunduh video!`);
+  } finally {
+      uselimit(sender); 
+  }
+}
+
+    break;
+
+case 'play': {
+  if (limitnya < 1) return Reply(mess.limit);
+  await dycoders.sendMessage(m.chat, { react: { text: '🕖', key: m.key } });
+
+  const axios = require('axios');
+  const yts = require('yt-search');
+
+  const savetube = {
+      api: {
+          base: "https://media.savetube.me/api",
+          cdn: "/random-cdn",
+          info: "/v2/info",
+          download: "/download"
+      },
+      headers: {
+          'accept': '*/*',
+          'content-type': 'application/json',
+          'origin': 'https://yt.savetube.me',
+          'referer': 'https://yt.savetube.me/',
+          'user-agent': 'Postify/1.0.0'
+      },
+      formats: ['144', '240', '360', '480', '720', '1080', 'mp3'],
+
+      crypto: {
+          hexToBuffer: (hexString) => {
+              return Buffer.from(hexString.match(/.{1,2}/g).join(''), 'hex');
+          },
+          decrypt: async (enc) => {
+              try {
+                  const secretKey = 'C5D58EF67A7584E4A29F6C35BBC4EB12';
+                  const data = Buffer.from(enc, 'base64');
+                  const iv = data.slice(0, 16);
+                  const content = data.slice(16);
+                  const key = savetube.crypto.hexToBuffer(secretKey);
+
+                  const decipher = crypto.createDecipheriv('aes-128-cbc', key, iv);
+                  let decrypted = decipher.update(content);
+                  decrypted = Buffer.concat([decrypted, decipher.final()]);
+
+                  return JSON.parse(decrypted.toString());
+              } catch (error) {
+                  throw new Error(`${error.message}`);
+              }
+          }
+      },
+
+      isUrl: (str) => {
+          try {
+              new URL(str);
+              return true;
+          } catch (_) {
+              return false;
+          }
+      },
+
+      youtube: (url) => {
+          if (!url) return null;
+          const regex = [
+              /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+              /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+              /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+              /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+              /youtu\.be\/([a-zA-Z0-9_-]{11})/
+          ];
+          for (let pattern of regex) {
+              if (pattern.test(url)) return url.match(pattern)[1];
+          }
+          return null;
+      },
+
+      request: async (endpoint, data = {}, method = 'post') => {
+          try {
+              const { data: response } = await axios({
+                  method,
+                  url: `${endpoint.startsWith('http') ? '' : savetube.api.base}${endpoint}`,
+                  data: method === 'post' ? data : undefined,
+                  params: method === 'get' ? data : undefined,
+                  headers: savetube.headers
+              });
+              return {
+                  status: true,
+                  code: 200,
+                  data: response
+              };
+          } catch (error) {
+              return {
+                  status: false,
+                  code: error.response?.status || 500,
+                  error: error.message
+              };
+          }
+      },
+
+      getCDN: async () => {
+          const response = await savetube.request(savetube.api.cdn, {}, 'get');
+          if (!response.status) return response;
+          return {
+              status: true,
+              code: 200,
+              data: response.data.cdn
+          };
+      },
+
+      download: async (link, format) => {
+          if (!link) return { status: false, code: 400, error: "Masukkan link YouTube!" };
+          if (!savetube.isUrl(link)) return { status: false, code: 400, error: "Masukkan link YouTube yang valid!" };
+          if (!format || !savetube.formats.includes(format)) return { status: false, code: 400, error: "Format tidak valid!", available_fmt: savetube.formats };
+
+          const id = savetube.youtube(link);
+          if (!id) return { status: false, code: 400, error: "Gagal mengekstrak video ID dari link!" };
+
+          try {
+              const cdnx = await savetube.getCDN();
+              if (!cdnx.status) return cdnx;
+              const cdn = cdnx.data;
+
+              const result = await savetube.request(`https://${cdn}${savetube.api.info}`, { url: `https://www.youtube.com/watch?v=${id}` });
+              if (!result.status) return result;
+              const decrypted = await savetube.crypto.decrypt(result.data.data);
+
+              const dl = await savetube.request(`https://${cdn}${savetube.api.download}`, {
+                  id: id,
+                  downloadType: format === 'mp3' ? 'audio' : 'video',
+                  quality: format === 'mp3' ? '128' : format,
+                  key: decrypted.key
+              });
+
+              return {
+                  status: true,
+                  code: 200,
+                  result: {
+                      title: decrypted.title || "Tidak diketahui",
+                      type: format === 'mp3' ? 'audio' : 'video',
+                      format: format,
+                      thumbnail: decrypted.thumbnail || `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+                      download: dl.data.data.downloadUrl,
+                      id: id,
+                      key: decrypted.key,
+                      duration: decrypted.duration,
+                      quality: format === 'mp3' ? '128' : format,
+                      downloaded: dl.data.data.downloaded || false
+                  }
+              };
+          } catch (error) {
+              return { status: false, code: 500, error: error.message };
+          }
+      }
+  };
+
+  async function getYouTubeUrl(query) {
+      let search = await yts(query);
+      if (!search.videos.length) return null;
+      return search.videos[0].url;
+  }
+
+  if (!text) return m.reply(`❌ Masukkan judul video atau link YouTube.`);
+
+  let videoUrl = text;
+  if (!videoUrl.startsWith("http")) {
+      let foundUrl = await getYouTubeUrl(text);
+      if (!foundUrl) return m.reply("❌ Video tidak ditemukan!");
+      videoUrl = foundUrl;
+  }
+
+  let isAudio = text.includes("--audio");
+  let isVideo = text.includes("--video");
+  let isJson = text.includes("--json");
+
+  let format = isAudio ? 'mp3' : '720';
+
+  try {
+      let res = await savetube.download(videoUrl, format);
+      if (!res.status) return m.reply(`❌ *Error:* ${res.error}`);
+
+      let { title, download, type, thumbnail } = res.result;
+
+      let infoMessage = `🎵 *YouTube Downloader*\n\n📌 *Judul:* ${title}\n📺 *Tipe:* ${type}\n`;
+
+      if (isJson) {
+          await dycoders.sendMessage(m.chat, { text: JSON.stringify(res.result, null, 2) }, { quoted: m });
+      } else if (!isAudio && !isVideo) {
+          await dycoders.sendMessage(m.chat, {
+              image: { url: thumbnail },
+              caption: infoMessage,
+              footer: wm,
+              buttons: [
+                  { buttonId: `.yt ${videoUrl} --audio`, buttonText: { displayText: "🎵 Download Audio" }, type: 1 },
+                  { buttonId: `.yt ${videoUrl} --video`, buttonText: { displayText: "📹 Download Video" }, type: 1 },
+                  { buttonId: `.yt ${videoUrl} --json`, buttonText: { displayText: "📜 Lihat JSON" }, type: 1 }
+              ],
+              headerType: 4,
+              viewOnce: true,
+          }, { quoted: m });
+      } else if (isAudio) {
+          await dycoders.sendMessage(m.chat, { audio: { url: download }, mimetype: "audio/mpeg" }, { quoted: m });
+      } else if (isVideo) {
+          await dycoders.sendMessage(m.chat, { video: { url: download }, mimetype: "video/mp4" }, { quoted: m });
+      }
+
+  } catch (e) {
+      m.reply(`❌ Gagal mengunduh video!`);
+  } finally {
+      uselimit(sender); 
+  }
 }
 break;
 
