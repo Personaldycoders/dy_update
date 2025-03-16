@@ -662,6 +662,7 @@ const allmenu = `
 │ 📼 .toimg reply sticker  
 │ 💡 .hd/.remini reply img  
 │ 💳 .ceklimit  
+│ 🤖 .islamai text
 └──────────────┘  
 
 ┌─〔 💾 DOWNLOAD MENU 〕─┐  
