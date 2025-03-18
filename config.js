@@ -13,7 +13,10 @@ global.mess = {
   group: "khusus group cik",
   admin: "khusus admin cik",
   botAdmin: "bot harus admin cik",
-  limit: "Yahh limit lu habis"
+  limit: "Yahh limit lu habis",
+  wait: `sabar...`,
+  done: 'done cihuy',
+  prem: 'khusus prem cik'
 }
 global.ifowner = "khusus owner cik"
 global.tumb = [
@@ -67,9 +70,21 @@ global.ApiDns4 = 'czHbwD26uv7x3pEK1uv2XDPIoAFY7cpn5MVPHOoo'
 global.zoneid5 = '372d436604ee728acdfa05c4c306ec3d'
 global.ApiDns5= 'UKl7YY-oTmuwL8kRKbwqhh6WSDK4VrWddvjdNKYJ'
 
-//CF SETTINGS DOMAIN 
+//CF SETTINGS DOMAIN 6
 global.zoneid6 = '0ea2d7e5371d912a128f0888bab30f81'
 global.ApiDns6 = 'UKl7YY-oTmuwL8kRKbwqhh6WSDK4VrWddvjdNKYJ'
+
+
+//CF SETTINGS DOMAIN 7
+global.zoneid7 = 'b6651dff70249985371a35b8bb71806a'
+global.ApiDns7 = 'UKl7YY-oTmuwL8kRKbwqhh6WSDK4VrWddvjdNKYJ'
+
+//CF SETTINGS DOMAIN 8
+global.zoneid8 = 'd76fefc63929c12685e02c71a27f63bc'
+global.ApiDns8 = 'UKl7YY-oTmuwL8kRKbwqhh6WSDK4VrWddvjdNKYJ'
+
+
+
 
 
 
@@ -79,7 +94,8 @@ global.domain3 = 'serverku-pterodactyl.web.id'
 global.domain4 = 'pterodactyl-host.xyz'
 global.wings= 'node-i.my.id'
 global.domain6 = 'cloud-ku.my.id'
-
+global.domain7 = 'panel-i.biz.id'
+global.domain8 = 'premium-host.biz.id'
 global.limitawal = "10"
 
 let file = require.resolve(__filename)

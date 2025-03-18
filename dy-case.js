@@ -53,7 +53,19 @@ module.exports = dycoders = async (dycoders, m, chatUpdate, store) => {
       m.mtype === "interactiveResponseMessage" ? JSON.parse(m.msg.nativeFlowResponseMessage.paramsJson).id :m.mtype === "templateButtonReplyMessage" ? m.msg.selectedId :
       m.mtype === "messageContextInfo" ? m.message.buttonsResponseMessage?.selectedButtonId || m.message.listResponseMessage?.singleSelectReply.selectedRowId || m.text : ""
 );
-    const sender = m.key.fromMe ? dycoders.user.id.split(":")[0] + "@s.whatsapp.net" || dycoders.user.id : m.key.participant || m.key.remoteJid;
+const siowner = [dycoders.decodeJid(dycoders.user.id), ...global.rowner.map(([number]) => number), ].map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net").includes(m.sender);
+const premium = fs.readFileSync('./start/lib/database/prem.json').toString()
+const prem = JSON.parse(fs.readFileSync('./start/lib/database/prem.json').toString())
+const isPremium = siowner ? true : [premium, ...prem].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
+const own = JSON.parse(fs.readFileSync('./start/lib/database/owner.json').toString())
+const sender = m.key.fromMe || [dycoders.decodeJid(dycoders.user.id), ...global.rowner.map(([number]) => number)]
+    .map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
+    .includes(m.key.participant || m.key.remoteJid)
+    ? dycoders.user.id.split(':')[0] + '@s.whatsapp.net' 
+    : (m.key.participant || m.key.remoteJid);
+
+
+
     const senderNumber = sender.split('@')[0];
     const budy = (typeof m.text === 'string' ? m.text : '');
 
@@ -63,7 +75,6 @@ module.exports = dycoders = async (dycoders, m, chatUpdate, store) => {
     const tumbn = global.tumb
 const thumbnail = tumbn[Math.floor(Math.random() * tumbn.length)];
     const botNumber = await dycoders.decodeJid(dycoders.user.id);
-const siowner = [dycoders.decodeJid(dycoders.user.id), ...global.rowner.map(([number]) => number), ].map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net").includes(m.sender);
 
 const prefix = ".";  
 const isCmd = body.startsWith(prefix);  
@@ -86,9 +97,8 @@ const groupAdmins = participants.filter(v => v.admin !== null).map(v => v.id);
 const groupMembers = participants.map(v => v.id);
 const { islamai } = require('./start/lib/islamai');
     const isBotGroupAdmins = isGroup ? groupAdmins.includes(botNumber) : false;
-    const isBotAdmins = groupAdmins.includes(botNumber);
-    const isAdmins = isGroup ? groupAdmins.includes(m.sender) : false;
-    
+    const isBotAdmins = m?.isGroup ? groupAdmins.includes(botNumber) : false;
+const isAdmins = m?.isGroup ? groupAdmins.includes(m?.sender) : false;
 
 
 
@@ -105,7 +115,7 @@ const { islamai } = require('./start/lib/islamai');
       fetchJson,
       sleep 
     } = require('./start/lib/myfunction');
-const { pinterest, pinterest2, mediafire, tiktokDl } = require('./start/lib/scraper');
+const { mediafire, tiktokDl } = require('./start/lib/scraper');
 
 const formatp = (bytes) => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -114,6 +124,100 @@ const formatp = (bytes) => {
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
 };
 
+
+async function getCookies() {
+    try {
+        const response = await axios.get('https://www.pinterest.com/csrf_error/');
+        const setCookieHeaders = response.headers['set-cookie'];
+        if (setCookieHeaders) {
+            const cookies = setCookieHeaders.map(cookieString => {
+                const cookieParts = cookieString.split(';');
+                const cookieKeyValue = cookieParts[0].trim();
+                return cookieKeyValue;
+            });
+            return cookies.join('; ');
+        } else {
+            console.warn('No set-cookie headers found in the response.');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching cookies:', error);
+        return null;
+    }
+}
+
+async function pinterest(query) {
+    try {
+        const cookies = await getCookies();
+        if (!cookies) {
+            console.log('Failed to retrieve cookies. Exiting.');
+            return;
+        }
+
+        const url = 'https://www.pinterest.com/resource/BaseSearchResource/get/';
+
+        const params = {
+            source_url: `/search/pins/?q=${query}`,
+            data: JSON.stringify({
+                "options": {
+                    "isPrefetch": false,
+                    "query": query,
+                    "scope": "pins",
+                    "no_fetch_context_on_resource": false
+                },
+                "context": {}
+            }),
+            _: Date.now()
+        };
+
+        const headers = {
+            'accept': 'application/json, text/javascript, */*, q=0.01',
+            'accept-encoding': 'gzip, deflate',
+            'accept-language': 'en-US,en;q=0.9',
+            'cookie': cookies,
+            'dnt': '1',
+            'referer': 'https://www.pinterest.com/',
+            'sec-ch-ua': '"Not(A:Brand";v="99", "Microsoft Edge";v="133", "Chromium";v="133"',
+            'sec-ch-ua-full-version-list': '"Not(A:Brand";v="99.0.0.0", "Microsoft Edge";v="133.0.3065.92", "Chromium";v="133.0.6943.142"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-model': '""',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-ch-ua-platform-version': '"10.0.0"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0',
+            'x-app-version': 'c056fb7',
+            'x-pinterest-appstate': 'active',
+            'x-pinterest-pws-handler': 'www/[username]/[slug].js',
+            'x-pinterest-source-url': '/hargr003/cat-pictures/',
+            'x-requested-with': 'XMLHttpRequest'
+        };
+
+        const { data } = await axios.get(url, {
+            headers: headers,
+            params: params
+        })
+
+        const container = [];
+        const results = data.resource_response.data.results.filter((v) => v.images?.orig);
+        results.forEach((result) => {
+            container.push({
+                upload_by: result.pinner.username,
+                fullname: result.pinner.full_name,
+                followers: result.pinner.follower_count,
+                caption: result.grid_title,
+                image: result.images.orig.url,
+                source: "https://id.pinterest.com/pin/" + result.id,
+            });
+        });
+
+        return container;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
 const snapinst = {
     async app(url) {
        const { data } = await axios.get('https://snapinst.app/');
@@ -212,7 +316,14 @@ async function remini(urlPath, method) {
 }
 
 
-
+const reaction = async (emoji) => {
+dycoders.sendMessage(m.chat, {
+react: {
+text: emoji,
+key: m.key
+}
+})
+}
 const getRandom = (ext) => {
     return `${Math.floor(Math.random() * 10000)}${ext}`
 }
@@ -220,9 +331,11 @@ const getRandom = (ext) => {
 const example = (teks) => {
 return `\n *Contoh Penggunaan :*\n Ketik *${prefix+command}* ${teks}\n`
 }
+
 const Reply = async (teks) => {
 return dycoders.sendMessage(m.chat, {text: teks, mentions: [m.sender], contextInfo: {
 isForwarded: true, 
+renderLargerThumbnail: false,
 forwardingScore: 9999, 
 businessMessageForwardInfo: { businessOwnerJid: global.owner }, forwardedNewsletterMessageInfo: { newsletterName: `${botname}`, newsletterJid: global.saluran }, 
 externalAdReply: {
@@ -232,9 +345,7 @@ thumbnailUrl: thumbnail,
 sourceUrl: null, 
 }}}, {quoted: null})
 }
-if (!dycoders.public) {
-if (!m.key.fromMe && !siowner) return;
-}
+
 
 
 async function quote(text, avatar, name) {
@@ -267,50 +378,34 @@ async function quote(text, avatar, name) {
   const buffer =  Buffer.from(res.data.result.image, "base64")
   return buffer;
 }
-async function forbiden(txt) {
-const Dyganteng = {      
-contextInfo: {
-forwardingScore: 999,
-isForwarded: true,
-renderLargerThumbnail: true,
-forwardedNewsletterMessageInfo: {
-newsletterName: botname,
-newsletterJid: "120363303267333730@newsletter",
-},
-externalAdReply: {  
-showAdAttribution: true,
-title: `¥ dy_net ¥ `,
-body: '로dycoders.xyz',
-thumbnailUrl: global.forbiden,
-sourceUrl: 'https://dycoders.xyz',
-},
-},
-text: txt,
-}
-return dycoders.sendMessage(m.chat, Dyganteng, {
-quoted: fswtag,
-})
-}
 
-
-
-
-const premFile = path.join(__dirname, './start/lib/database/prem.json');
-
-function loadPremium() {
-    if (!fs.existsSync(premFile)) fs.writeFileSync(premFile, JSON.stringify([]));
-    return JSON.parse(fs.readFileSync(premFile));
+async function forbiden(text) {
+    await dycoders.sendMessage(
+        m.chat,
+        {
+            text: text, 
+            contextInfo: {
+                mentionedJid: [m.sender],
+                forwardedNewsletterMessageInfo: {
+                    newsletterName: "dycoders.xyz",
+                    newsletterJid: `120363303267333730@newsletter`,
+                },
+                isForwarded: false,
+                externalAdReply: {
+                    showAdAttribution: true,
+                    title: `Acces di Tolak`,
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                    thumbnailUrl: global.forbiden, 
+                    sourceUrl: `https://dycoders.xyz`,
+                },
+            },
+        },
+        { quoted: m }
+    );
 }
 
 
-function savePremium(data) {
-    fs.writeFileSync(premFile, JSON.stringify(data, null, 2));
-}
-
-function isPremium(user) {
-    let prem = loadPremium();
-    return prem.includes(user);
-}
 
 const resellerFile = path.join(__dirname, './start/lib/database/reseller.json');
 
@@ -385,7 +480,7 @@ function addLimit(sender, jumlah) {
     saveDB(db);
 }
 let limitnya = getLimit(sender);
-
+let limit = getLimit(m.sender);
 const totalFitur = () =>{
             var mytext = fs.readFileSync("./dy-case.js").toString()
             var numUpper = (mytext.match(/case '/g) || []).length;
@@ -518,26 +613,29 @@ let mode = dycoders.public ? "Public" : "Self";
 
 
 const cloudflare = ` 
-*✨ hallo ${m.pushName} 👋, saya adalah dynet bot! ✨*  
-_bot ini dikembangkan oleh_ dycoders.xyz 
+✨ 𝗛𝗮𝗹𝗹𝗼 ${m.pushName} 👋, Saya Dynet Bot! ✨  
+_Bot ini dikembangkan oleh_ *dycoders.xyz*  
 
-╔══✪ 𝙞𝙣𝙛𝙤𝙧𝙢𝙖𝙨𝙞 𝙗𝙤𝙩 ✪══╗  
-║ 📛 *botname:* ${botname}  
-║ 🔢 *version:* 1.1.0  
-║ 🌐 *mode:* ${mode}  
-║ 🧑‍💻 *creator:* dycoders.xyz  
-╚═══════════════════╝  
+╭───〔 *INFO BOT* 〕───✧  
+│ 📛 *Bot Name:*  ${botname}  
+│ 🔢 *Version:*  1.1.1  
+│ 🌐 *Mode:*  ${mode}  
+│ 🧑‍💻 *Creator:*  dycoders.xyz  
+│ 💳 *Limit Anda:*  ${limit}  
+╰──────────────────✧  
 
-╔══✪ 𝙘𝙡𝙤𝙪𝙙𝙛𝙡𝙖𝙧𝙚 𝙢𝙚𝙣𝙪 ✪══╗  
-║ 🌐 *.subdomain1*= cloud-ku.my.id
-║ 🌐 *.subdomain2*= mycloudpremiumid.xyz  
-║ 🌐 *.subdomain3*= serverku-pterodactyl.web.id
-║ 🌐 *.subdomain4*= pterodactyl-host.xyz
-║ 🌐 *.subdomain5*= node-i.my.id
-║ 🛠️ .*editdns* id|yes/no  
-║ 📌 *.addiprules* note|ipvps  
-║ 🌩 *.autocf* iddomain|ipvps
-╚═══════════════════╝  
+╭───〔 *CLOUDFLARE MENU* 〕───✧  
+│ 🌐 *.subdomain1* = cloud-ku.my.id  
+│ 🌐 *.subdomain2* = mycloudpremiumid.xyz  
+│ 🌐 *.subdomain3* = serverku-pterodactyl.web.id  
+│ 🌐 *.subdomain4* = pterodactyl-host.xyz  
+│ 🌐 *.subdomain5* = node-i.my.id  
+│ 🌐 *.subdomain6* = panel-i.biz.id  
+│ 🌐 *.subdomain7* = premium-host.biz.id  
+│ 🛠️  .*editdns* id|yes/no  
+│ 📌  *.addiprules* note|ipvps  
+│ 🌩  *.autocf* iddomain|ipvps  
+╰──────────────────✧  
 
 `
 const cpanelnya = `
@@ -548,7 +646,7 @@ const cpanelnya = `
 
 📌 *informasi bot:*  
 ┣╾📛 *botname:* ${botname}  
-┣╾🔢 *version:* 1.1.0  
+┣╾🔢 *version:* 1.1.1
 ┣╾🌐 *mode:* ${mode}  
 ┣╾🧑‍💻 *creator:* dycoders.xyz  
 ┗━━━━━━━━━━━━━━━━━━┛  
@@ -583,7 +681,7 @@ const cpnelnyav2 = `
 
 📌 *informasi bot:*  
 ┣╾📛 *botname:* ${botname}  
-┣╾🔢 *version:* 1.1.0  
+┣╾🔢 *version:* 1.1.1
 ┣╾🌐 *mode:* ${mode}  
 ┣╾🧑‍💻 *creator:* dycoders.xyz  
 ┗━━━━━━━━━━━━━━━━━━┛  
@@ -612,19 +710,23 @@ const cpnelnyav2 = `
 
 
 const allmenu = ` 
+┌─〔 🤖 *DY_NET BOT* 〕─┐  
+│ 👋 *Halo, ${m.pushName}!* Selamat datang!  
+│ ⚙️ Saya adalah *Dy_Net Bot*  
+│ 🛠️ Dikembangkan oleh *dycoders.xyz*  
+│ 🎟️ *Limit Anda:* ${limit}  
+│ 🔰 *Status:* ${siowner ? "Owner" : isPremium ? "Premium" : "Free"}  
+└───────────────────┘  
 
-┌─〔 🤖 DY_NET BOT 〕─┐  
-│ 👋 Halo ${m.pushName}, selamat datang!  
-│ 🛠 Saya adalah *Dy_Net Bot*  
-│ 🔧 Dikembangkan oleh *dycoders.xyz*  
-└──────────────┘  
+┌─〔 🔍 *INFO BOT* 〕─┐  
+│ 🤖 *Botname:* Dy_Net  
+│ 🏷️ *Version:* 1.1.1  
+│ 🌍 *Mode:* ${mode}  
+│ 👨‍💻 *Creator:* dycoders.xyz  
+└───────────────────┘  
 
-┌─〔 🏷 INFO BOT 〕─┐  
-│ 📛 *Botname:* Dy_Net  
-│ 🔢 *Version:* 1.1.0  
-│ 🌐 *Mode:* ${mode}  
-│ 🧑‍💻 *Creator:* dycoders.xyz  
-└──────────────┘  
+🚀 *Gunakan perintah yang tersedia untuk menikmati fitur terbaik!*
+
 
 ┌─〔 👑 OWNER MENU 〕─┐  
 │ ✨ .addprem [user]  
@@ -683,6 +785,8 @@ const allmenu = `
 │ 🌐 .subdomain3 > serverku-pterodactyl.web.id  
 │ 🌐 .subdomain4 > pterodactyl-host.xyz  
 │ 🌐 .subdomain5 > node-i.my.id  
+│ 🌐 .subdomain6 > panel-i.biz.id 
+│ 🌐 .subdomain7 > premium-host.biz.id
 │ 📝 .editdns id|yes/no  
 │ 📌 .addiprules note|ipvps  
 │ 🌩️ .autocf iddomain|ipvps  
@@ -697,6 +801,7 @@ const allmenu = `
 │ 👻 .hidetag [text]  
 │ 🔗 .linkgc  
 │ ♻️ .resetlinkgc  
+│ 🖼️ .setppgc reply img
 └──────────────┘  
 
 ┌─〔 🔧 TOOLS MENU 〕─┐  
@@ -712,6 +817,11 @@ const allmenu = `
 │ 💡 .hd/.remini reply img  
 │ 💳 .ceklimit  
 │ 🤖 .islamai text
+│ 🖌️ .txt2anime prompt
+│ 🖌️ .texttoimg prompt
+│ ️🔍 .lirik judul
+│ 🔎 .githubstalk username
+│ 💡 .pinterest/.pin query
 └──────────────┘  
 
 ┌─〔 💾 DOWNLOAD MENU 〕─┐  
@@ -719,7 +829,9 @@ const allmenu = `
 │ 📁 .mediafire url  
 │ 📁 .git urlrepo  
 │ ▶️ .yt url  
+│ 🎶 .spotifydl url track
 │ 🎥 .ig/.instagram url  
+│ 🗃 .npmd name
 └──────────────┘  
 
 ┌─〔 🎧 PLAY MENU 〕─┐  
@@ -737,16 +849,28 @@ const allmenu = `
 
 
 
-
+    
 
 const menunya = ` 
-*_Hallo ${m.pushName}👋 Saya Adalah dynet Bot yang di kembanhkan Oleh dycoders.xyz*
-   ╭──『 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐒𝐈 𝐁𝐎𝐓 』
-   │ 📛 *Botname:* dy_net
-   │ 🔢 *Version:* 1.1.0
-   │ 🌐 *Mode:* ${mode}
-   │ 🧑‍💻 *Creator:* dycoders.xyz
-   ╰───────────────── 
+╭───〔 *DYNET BOT* 〕───✧
+│ 👋 *Hallo, ${m.pushName}!*  
+│ 🤖 Saya adalah *Dynet Bot*  
+│     dikembangkan oleh *dycoders.xyz*  
+│ 💳 *Limit Anda:* ${limit}  
+│ ⚡ *Status:* ${siowner ? "Owner" : isPremium ? "Premium" : "Free"}  
+╰─────────────────────✧  
+
+📌 *INFORMASI BOT:*  
+╭─────────────────────  
+│ 📛 *Bot Name:* dy_net  
+│ 🔢 *Version:* 1.1.1  
+│ 🌐 *Mode:* ${mode}  
+│ 🧑‍💻 *Creator:* dycoders.xyz  
+╰─────────────────────  
+
+🚀 *Gunakan perintah yang tersedia*  
+🚀 *untuk menikmati fitur terbaik!*  
+
 `
 
 
@@ -754,7 +878,7 @@ const menunya = `
 switch (command) {
 
 case 'brat': {
-if (limitnya < 1) return Reply(mess.limit);
+if (limitnya < 1) return forbiden(mess.limit);
 if (!text) return Reply(`masukkan text nya juga`)
 
 const apis1 = `https://vapis.my.id/api/bratv1?q=${text}`
@@ -778,7 +902,7 @@ Reply(`Reply gambar/video/gif dengan caption ${command}\nBatas durasi video 1-9 
 break
 
 case 'bratvideo': case 'bratvid': {
-  if (limitnya < 1) return Reply(mess.limit)
+  if (limitnya < 1) return forbiden(mess.limit)
 const axios = require('axios');
 const { execSync } = require('child_process')
   if (!text) return Reply(`Contoh: ${prefix+command} halo saya dycoders.xyz`)
@@ -833,7 +957,7 @@ if (!siowner) return forbiden(mess.owner)
 
 
     let t = text.split(',');  
-    if (t.length < 2) return m.reply(`Contoh: ${prefix + command} username,nomor`);  
+    if (t.length < 2) return Reply(`Contoh: ${prefix + command} username,nomor`);  
 
     let username = t[0].trim();  
     let inputNumber = t[1].replace(/[^0-9]/g, '');  
@@ -864,7 +988,7 @@ if (!siowner) return forbiden(mess.owner)
         });  
 
         let userData = await userRes.json();  
-        if (userData.errors) return m.reply(JSON.stringify(userData.errors[0], null, 2));  
+        if (userData.errors) return Reply(JSON.stringify(userData.errors[0], null, 2));  
 
         dycoders.sendMessage(u, {  
             image: { url: thumbnail },  
@@ -913,11 +1037,11 @@ if (!siowner) return forbiden(mess.owner)
             viewOnce: true  
         });  
 
-        m.reply(`✅ *Akun berhasil dibuat!* \n\n📩 Data telah dikirim ke nomor: *${inputNumber}*`);  
+        Reply(`✅ *Akun berhasil dibuat!* \n\n📩 Data telah dikirim ke nomor: *${inputNumber}*`);  
 
     } catch (error) {  
         console.error(error);  
-        m.reply("❌ Terjadi kesalahan saat membuat akun. Cek kembali konfigurasi dan input Anda.");  
+        Reply("❌ Terjadi kesalahan saat membuat akun. Cek kembali konfigurasi dan input Anda.");  
     }  
     break;  
 }
@@ -927,7 +1051,7 @@ if (!siowner) return forbiden(mess.owner)
 
 
     let t = text.split(',');  
-    if (t.length < 2) return m.reply(`Contoh: ${prefix + command} username,nomor`);  
+    if (t.length < 2) return Reply(`Contoh: ${prefix + command} username,nomor`);  
 
     let username = t[0].trim();  
     let inputNumber = t[1].replace(/[^0-9]/g, '');  
@@ -958,7 +1082,7 @@ if (!siowner) return forbiden(mess.owner)
         });  
 
         let userData = await userRes.json();  
-        if (userData.errors) return m.reply(JSON.stringify(userData.errors[0], null, 2));  
+        if (userData.errors) return Reply(JSON.stringify(userData.errors[0], null, 2));  
 
         dycoders.sendMessage(u, {  
             image: { url: thumbnail },  
@@ -1007,11 +1131,11 @@ if (!siowner) return forbiden(mess.owner)
             viewOnce: true  
         });  
 
-        m.reply(`✅ *Akun berhasil dibuat!* \n\n📩 Data telah dikirim ke nomor: *${inputNumber}*`);  
+        Reply(`✅ *Akun berhasil dibuat!* \n\n📩 Data telah dikirim ke nomor: *${inputNumber}*`);  
 
     } catch (error) {  
         console.error(error);  
-        m.reply("❌ Terjadi kesalahan saat membuat akun. Cek kembali konfigurasi dan input Anda.");  
+        Reply("❌ Terjadi kesalahan saat membuat akun. Cek kembali konfigurasi dan input Anda.");  
     }  
     break;  
 }
@@ -1051,21 +1175,32 @@ case 'delreseller': {
     Reply(`✅ Berhasil menghapus ${number} dari daftar reseller!`);
     break;
 }
+case "self": {
+    const siowner = [dycoders.decodeJid(dycoders.user.id), ...global.rowner.map(([number]) => number)]
+        .map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
+        .includes(m.sender);
 
+    console.log(`SIOWNER:`, siowner, `SENDER:`, m.sender, `OWNER LIST:`, global.rowner);
 
+    if (!siowner) return forbiden(mess.owner);
+    dycoders.public = false;
+    Reply(`𝙱𝚎𝚛𝚊𝚕𝚒𝚑 𝚔𝚎 𝚖𝚘𝚍𝚎 𝚜𝚎𝚕𝚏!`);
+    break;
+}
 
-case 'self': {
-                 if (!siowner) return forbiden(mess.owner)
-                dycoders.public = false
-                Reply(`𝙱𝚎𝚛𝚊𝚕𝚒𝚑 𝚔𝚎 𝚖𝚘𝚍𝚎 𝚜𝚎𝚕𝚏!`)
-            }
-            break
-            case 'public': {
-                 if (!siowner) return forbiden(mess.owner)
-                dycoders.public = true
-                Reply(`𝙱𝚎𝚛𝚊𝚕𝚒𝚑 𝚔𝚎 𝚖𝚘𝚍𝚎 𝚙𝚞𝚋𝚕𝚒??!`)
-            }
-            break
+case "public": {
+    const siowner = [dycoders.decodeJid(dycoders.user.id), ...global.rowner.map(([number]) => number)]
+        .map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
+        .includes(m.sender);
+
+    console.log(`SIOWNER:`, siowner, `SENDER:`, m.sender, `OWNER LIST:`, global.rowner);
+
+    if (!siowner) return forbiden(mess.owner);
+    dycoders.public = true;
+    Reply(`𝙱𝚎𝚛𝚊𝚕𝚒𝚑 𝚔𝚎 𝚖𝚘𝚍𝚎 𝚙𝚞𝚋𝚕𝚒𝚌!`);
+    break;
+}
+
             
 case 'ping': case 'botstatus': {
   const os = require('os');
@@ -1215,7 +1350,7 @@ case 'menu': {
 break;
 
 case 'tqto': {
-    let teks = `*╔══❖✦✦❖══╗*\n      *TQ TO*\n*╚══❖✦✦❖══╝*\n\n🔹 *DyCoders* (Developer)\n🔹 *Member dycoders* (Support)\n🔹 *Asta-store* My friends`;
+    let teks = `*╔══❖✦✦❖══╗*\n      *TQ TO*\n*╚══❖✦✦❖══╝*\n\n🔹 *DyCoders* (Developer)\n🔹 *Member dycoders* (Support)\n🔹 *Asta-store* My friends\n🔹 *Zidan* ( support ) `;
 
     await dycoders.sendMessage(m.chat, {
         image: { url: thumbnail },
@@ -1354,7 +1489,7 @@ break
 
 
 case "1gb": case "2gb": case "3gb": case "4gb": case "5gb": case "6gb": case "7gb": case "8gb": case "9gb": case "10gb": case "unlimited": case "unli": {
-  if (!isReseller(sender)) return Reply("Fitur ini hanya untuk reseller!");
+  if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
 
 
     if (!text) return Reply("username,nomor");
@@ -1420,7 +1555,7 @@ case "1gb": case "2gb": case "3gb": case "4gb": case "5gb": case "6gb": case "7g
             })  
         });  
         let userData = await userRes.json();  
-        if (userData.errors) return m.reply(JSON.stringify(userData.errors[0], null, 2));  
+        if (userData.errors) return Reply(JSON.stringify(userData.errors[0], null, 2));  
         let user = userData.attributes;  
 
         let eggRes = await fetch(`${domain}/api/application/nests/5/eggs/${egg}`, {  
@@ -1474,7 +1609,7 @@ case "1gb": case "2gb": case "3gb": case "4gb": case "5gb": case "6gb": case "7g
             })  
         });  
         let serverData = await serverRes.json();  
-        if (serverData.errors) return m.reply(JSON.stringify(serverData.errors[0], null, 2));  
+        if (serverData.errors) return Reply(JSON.stringify(serverData.errors[0], null, 2));  
 let server = serverData.attributes;  
 
         dycoders.sendMessage(u, {
@@ -1540,7 +1675,7 @@ let server = serverData.attributes;
 
 
 case "1gb-v2": case "2gb-v2": case "3gb-v2": case "4gb-v2": case "5gb-v2": case "6gb-v2": case "7gb-v2": case "8gb-v2": case "9gb-v2": case "10gb-v2": case "unlimited-v2": case "unli-v2": {
-  if (!isReseller(sender)) return Reply("Fitur ini hanya untuk reseller!");
+  if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
 
 
     if (!text) return Reply("username,nomor");
@@ -1606,7 +1741,7 @@ case "1gb-v2": case "2gb-v2": case "3gb-v2": case "4gb-v2": case "5gb-v2": case 
             })  
         });  
         let userData = await userRes.json();  
-        if (userData.errors) return m.reply(JSON.stringify(userData.errors[0], null, 2));  
+        if (userData.errors) return Reply(JSON.stringify(userData.errors[0], null, 2));  
         let user = userData.attributes;  
 
         let eggRes = await fetch(`${cpanelv2}/api/application/nests/5/eggs/${egg}`, {  
@@ -1660,7 +1795,7 @@ case "1gb-v2": case "2gb-v2": case "3gb-v2": case "4gb-v2": case "5gb-v2": case 
             })  
         });  
         let serverData = await serverRes.json();  
-        if (serverData.errors) return m.reply(JSON.stringify(serverData.errors[0], null, 2));  
+        if (serverData.errors) return Reply(JSON.stringify(serverData.errors[0], null, 2));  
 let server = serverData.attributes;  
 
         dycoders.sendMessage(u, {
@@ -1804,6 +1939,62 @@ groupJid: jid.trim(),
  }, ], },},{quoted: fswtag });
 }
 break;
+case "postmusic": {
+    if (!m.quoted) {
+        return Reply(m.chat, `Reply gambar dengan caption *${prefix + command}*`, m);
+    }
+
+    let mime = m.quoted.mimetype || "";
+    if (!/image/.test(mime)) {
+        return Reply(m.chat, `Hanya bisa mengirim gambar, bukan ${mime}`, m);
+    }
+
+    try {
+        await dycoders.sendMessage(m.chat, { react: { text: "🕐", key: m.key } });
+
+        let imageBuffer = await m.quoted.download();
+        let caption = "Enjoy the music 🎶"; // Bisa diubah sesuai kebutuhan
+
+        await dycoders.sendMessage(
+            "status@broadcast",
+            {
+                image: imageBuffer,
+                caption: caption,
+                annotations: [
+                    {
+                        embeddedContent: {
+                            embeddedMusic: {
+                                musicContentMediaId: "1055201496437073",
+                                songId: "1118085175512946",
+                                author: "The.Wav",
+                                title: "I Love You",
+                                artworkDirectPath:
+                                    "/v/t62.76458-24/27395598_1002020668087405_6722814053980892307_n.enc?ccb=11-4&oh=01_Q5AaIV7SSvDPnWwdNqiI7QkIkie4wiqOi6Qk084isIsr-Wat&oe=67F81BD7&_nc_sid=5e03e0",
+                                artworkSha256: "iUgkXuVJp9sfxukOJsZS7NW1YOH46pZHJi77VlHyZMc=",
+                                artworkEncSha256: "XuaqRZHVCQPuiFgDYYtBzm5goOe6j9QndoTigxMywp8=",
+                                artistAttribution: "https://facebook.com/gregorystutzer",
+                                countryBlocklist: "",
+                                isExplicit: false,
+                                artworkMediaKey: "ezVPzIKc/ffgZKefRVRLLByPBRnkHGqPbR/2K1Renpc=",
+                            },
+                        },
+                        embeddedAction: true,
+                    },
+                ],
+            },
+            {
+                statusJidList: [m.sender],
+            }
+        );
+
+        await dycoders.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
+    } catch (error) {
+        console.error("❌ Error:", error);
+        await dycoders.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
+        return Reply(m.chat, `🚨 Terjadi kesalahan: ${error.message}`, m);
+    }
+    break;
+}
 
 
 case 'cekidgc': {
@@ -2003,13 +2194,13 @@ case "uninstallpanel": {
                 ress.exec(boostmysql, async (err, stream) => {
                     if (err) throw err;
                     stream.on('close', async (code, signal) => {
-                        await m.reply("Berhasil *uninstall* server panel ✅\nMenghapus SSL & restart Nginx...")
+                        await Reply("Berhasil *uninstall* server panel ✅\nMenghapus SSL & restart Nginx...")
 
                         // Eksekusi perintah hapus SSL & restart Nginx
                         ress.exec(removeSSLCommand, async (err, stream) => {
                             if (err) throw err;
                             stream.on('close', async (code, signal) => {
-                                await m.reply("SSL berhasil dihapus dan Nginx telah direstart ✅")
+                                await Reply("SSL berhasil dihapus dan Nginx telah direstart ✅")
                                 ress.end();
                             }).stderr.on('data', (data) => {
                                 Rply('Error saat menghapus SSL: ' + data);
@@ -2022,7 +2213,7 @@ case "uninstallpanel": {
                             await stream.write("\x09\n")
                         }
                     }).stderr.on('data', (data) => {
-                        m.reply('Berhasil Uninstall Server Panel ✅');
+                        Reply('Berhasil Uninstall Server Panel ✅');
                     });
                 });
 
@@ -2041,7 +2232,7 @@ case "uninstallpanel": {
                     await stream.write("\n")
                 }
             }).stderr.on('data', (data) => {
-                m.reply('STDERR: ' + data);
+                Reply('STDERR: ' + data);
             });
         });
     }).on('error', (err) => {
@@ -2117,7 +2308,7 @@ break
     
     
 case 'listsrv': { 
-if (!isReseller(sender)) return Reply("Fitur ini hanya untuk reseller!");
+if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
     let page = args[0] ? args[0] : '1'; 
 
     let f = await fetch(domain + "/api/application/servers?page=" + page, { 
@@ -2335,7 +2526,7 @@ break;
 
 
 case "installpanel": {
-
+if (limitnya < 1) return forbiden(mess.limit)
 if (!text) return Reply(example("ipvps|pwvps|panel.com|node.com"))
 let vii = text.split("|")
 
@@ -2525,21 +2716,22 @@ console.log('Stderr : ' + data);
 });
 }).connect(connSettings);
 }
+uselimit(sender);
 break  
 
 
 case "installnebula": {
 
-if (!text || !text.split("|")) return m.reply(example("ipvps|pwvps"))
+if (!text || !text.split("|")) return Reply(example("ipvps|pwvps"))
 let vii = text.split("|")
-if (vii.length < 2) return m.reply(example("ipvps|pwvps"))
+if (vii.length < 2) return Reply(example("ipvps|pwvps"))
 global.installtema = {
 vps: vii[0], 
 pwvps: vii[1]
 }
 
 
-if (global.installtema == undefined) return m.reply("Ip / Password Vps Tidak Ditemukan")
+if (global.installtema == undefined) return Reply("Ip / Password Vps Tidak Ditemukan")
 
 let ipvps = global.installtema.vps
 let passwd = global.installtema.pwvps
@@ -2555,11 +2747,11 @@ const command = `bash <(curl -s https://raw.githubusercontent.com/KiwamiXq1031/i
 const ress = new Client();
 
 ress.on('ready', async () => {
-m.reply("Memproses install *thema Nebula* pterodactyl\nTunggu 1-10 menit hingga proses selsai")
+Reply("Memproses install *thema Nebula* pterodactyl\nTunggu 1-10 menit hingga proses selsai")
 ress.exec(command, (err, stream) => {
 if (err) throw err
 stream.on('close', async (code, signal) => {    
-await m.reply("Berhasil install *tema nebula* pterodactyl ✅")
+await Reply("Berhasil install *tema nebula* pterodactyl ✅")
 ress.end()
 }).on('data', async (data) => {
 console.log(data.toString())
@@ -2572,12 +2764,12 @@ console.log('STDERR: ' + data)
 });
 }).on('error', (err) => {
 console.log('Connection Error: ' + err);
-m.reply('Katasandi atau IP tidak valid');
+Reply('Katasandi atau IP tidak valid');
 }).connect(connSettings);
 }
 break
 case "installblueprint": {
-    if (!text || !text.includes("|")) return m.reply("Format salah! Contoh: .installblueprint ipvps|pwvps");
+    if (!text || !text.includes("|")) return Reply("Format salah! Contoh: .installblueprint ipvps|pwvps");
     let [ipvps, passwd] = text.split("|").map(t => t.trim());
 
     const connSettings = {
@@ -2603,11 +2795,11 @@ case "installblueprint": {
     const ress = new Client();
 
     ress.on('ready', async () => {
-        m.reply("Memproses instalasi blueprint, tunggu beberapa menit...");
+        Reply("Memproses instalasi blueprint, tunggu beberapa menit...");
         ress.exec(command, (err, stream) => {
             if (err) throw err;
             stream.on('close', async () => {
-                await m.reply("✅ Installasi blueprint selesai! Ketik .installnebula");
+                await Reply("✅ Installasi blueprint selesai! Ketik .installnebula");
                 ress.end();
             }).on('data', (data) => {
                 console.log(data.toString());
@@ -2632,14 +2824,14 @@ case "installblueprint": {
         });
     }).on('error', (err) => {
         console.log('Connection Error: ' + err);
-        m.reply('❌ Gagal terhubung ke VPS. Cek IP atau Password.');
+        Reply('❌ Gagal terhubung ke VPS. Cek IP atau Password.');
     }).connect(connSettings);
 }
 break;
 
 
 case 'listsrv-v2': { 
-if (!isReseller(sender)) return Reply("Fitur ini hanya untuk reseller!");
+if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
     let page = args[0] ? args[0] : '1'; 
 
     let f = await fetch(cpanelv2 + "/api/application/servers?page=" + page, { 
@@ -2732,7 +2924,7 @@ if (!isReseller(sender)) return Reply("Fitur ini hanya untuk reseller!");
 
 
 case 'listusr': { 
-if (!isReseller(sender)) return Reply("Fitur ini hanya untuk reseller!");
+if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
 
     let page = args[0] ? args[0] : '1'; 
     let f = await fetch(domain + "/api/application/users?page=" + page + "&per_page=8", {  
@@ -2800,7 +2992,7 @@ if (!isReseller(sender)) return Reply("Fitur ini hanya untuk reseller!");
 
 
 case 'listusr-v2': { 
-if (!isReseller(sender)) return Reply("Fitur ini hanya untuk reseller!");
+if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
 
     let page = args[0] ? args[0] : '1'; 
     let f = await fetch(cpanelv2 + "/api/application/users?page=" + page + "&per_page=40", {  
@@ -2933,7 +3125,7 @@ break
 
 case 'tourl': {
     if (!/video/.test(mime) && !/image/.test(mime)) {
-        return m.reply(`Reply gambar atau video dengan keterangan/caption ${prefix + command}`);
+        return Reply(`Reply gambar atau video dengan keterangan/caption ${prefix + command}`);
     }
 
     try {
@@ -2942,7 +3134,7 @@ case 'tourl': {
         const link = await TelegraPh(media); 
         await dycoders.sendMessage(m.chat, { text: `Here is your link:\n${link}` }, { quoted: fswtag });
     } catch (err) {
-        m.reply('Terjadi kesalahan saat mengunggah file: ' + err.message);
+        Reply('Terjadi kesalahan saat mengunggah file: ' + err.message);
     }
 }
 break;
@@ -3148,7 +3340,7 @@ case 'delsrv-v2': {
 break;
 
 case 'splay': {
-  if (limitnya < 1) return Reply(mess.limit)
+  if (limitnya < 1) return forbiden(mess.limit)
     if (!text) return Reply("Silakan masukkan nama lagu atau URL Spotify untuk diunduh!");
 
     const Spotify = require('./start/lib/spotify.js');
@@ -3210,29 +3402,29 @@ case 'splay': {
 
             writer.on('error', async (error) => {
                 await dycoders.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
-                m.reply(`Gagal mengunduh file audio: ${error.message}`);
+                Reply(`Gagal mengunduh file audio: ${error.message}`);
             });
         } else {
             await dycoders.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
-            m.reply(`Gagal mengambil data: ${result.msg}`);
+            Reply(`Gagal mengambil data: ${result.msg}`);
         }
     } catch (error) {
         await dycoders.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
         console.error("Error:", error);
-        m.reply("Terjadi kesalahan saat mengambil data dari Spotify: " + error.message);
+        Reply("Terjadi kesalahan saat mengambil data dari Spotify: " + error.message);
     }
     uselimit(sender);
     break;
 }
 case 'editdns': {
-    if (!isPremium(m.sender)) return Reply("Fitur ini hanya untuk pengguna premium!");
+    if (!isPremium) return forbiden(mess.prem)
     if (!text.includes('|')) return Reply('Format salah! Contoh: .editdns id_dns|yes/no');
 
     let [recordId, proxy] = text.split('|').map(t => t.trim());
     let proxied = proxy.toLowerCase() === 'yes';
 
     let apiToken = global.ApiDns;
-    let zoneIds = [global.zoneid, global.zoneid2, global.zoneid3, global.zoneid4, global.zoneid5, global.zoneid6 ]; 
+    let zoneIds = [global.zoneid2, global.zoneid3, global.zoneid5, global.zoneid6, global.zoneid7, global.zoneid8]; 
 
     let success = false;
     let lastError = null;
@@ -3269,55 +3461,53 @@ case 'editdns': {
 }
 
 case 'addprem': {
-    if (!siowner) return forbiden(mess.owner);
-    if (!text) return Reply("Masukkan nomor! Contoh: .addprem 628xxx");
-
-    let number = text.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
-    let prem = loadPremium();
-
-    if (prem.includes(number)) return Reply("User sudah menjadi premium!");
-
-    prem.push(number);
-    savePremium(prem);
-
-    Reply(`✅ Berhasil menambahkan ${number} sebagai pengguna premium!`);
-
-  
-    await dycoders.sendMessage(number, {
-        image: { url: thumbnail },
-        caption: "🎉 Selamat! Kamu telah menjadi pengguna premium.\n\nNikmati fitur-fitur eksklusif yang tersedia!",
-        footer: wm,
-        buttons: [
-            {
-                buttonId: '.owner',
-                buttonText: { displayText: 'Owner Bot' },
-                type: 1,
-            }
-        ],
-        headerType: 1,
-        viewOnce: true
-    });
-
-    break;
+if (!siowner) return forbiden(mess.owner);
+if (!args[0]) return Reply(penggunaan("628xxx"))
+var premm = text.split("|")[0].replace(/[^0-9]/g, '')
+let target = premm + '@s.whatsapp.net'
+prem.push(premm)
+fs.writeFileSync('./start/lib/database/prem.json', JSON.stringify(prem))
+Reply(`Sukses menambah premium @${target.split('@')[0]}`)
+try {
+var ppnya = await dycoders.profilePictureUrl(target, "image")
+} catch {
+var ppnya = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png?q=60"
 }
-
+dycoders.sendMessage(target, {
+image: {
+url: ppnya
+},
+caption: "Selamat, kamu telah menjadi *User Premium*"
+}, {
+quoted: m
+})
+}
+break
 
 case 'delprem': {
-    if (!siowner) return forbiden(mess.owner);
-    if (!text) return Reply("Masukkan nomor! Contoh: .delprem 628xxx");
-
-    let number = text.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
-    let prem = loadPremium();
-
-    if (!prem.includes(number)) return Reply("User tidak ada dalam daftar premium!");
-
-    prem = prem.filter(user => user !== number);
-    savePremium(prem);
-
-    Reply(`✅ Berhasil menghapus ${number} dari daftar premium!`);
-
-    break;
+if (!siowner) return forbiden(mess.owner);
+if (!args[0]) return Reply(penggunaan("628xxx"))
+var premmm = text.split("|")[0].replace(/[^0-9]/g, '')
+let target = premmm + '@s.whatsapp.net'
+unp = own.indexOf(premmm)
+prem.splice(unp, 1)
+fs.writeFileSync('./start/lib/database/prem.json', JSON.stringify(prem))
+Reply(`Sukses menghapus premium @${target.split('@')[0]}`)
+try {
+var ppnya = await dycoders.profilePictureUrl(target, "image")
+} catch {
+var ppnya = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png?q=60"
 }
+dycoders.sendMessage(target, {
+image: {
+url: ppnya
+},
+caption: "Upss, kamu bukan *User Premium* Lagi"
+}, {
+quoted: m
+})
+}
+break
 case 'delowner': {
     if (!siowner) return forbiden(mess.owner);
     if (!text) return Reply("Masukkan nomor yang mau dihapus! Contoh: .delowner 628xxx");
@@ -3396,7 +3586,7 @@ case 'addowner': {
 }
 
 case 'addiprules': { 
-    if (!isPremium(m.sender)) return Reply("Fitur ini hanya untuk pengguna premium!"); 
+    if (!isPremium) return forbiden(mess.prem) 
     if (!text.includes('|')) return Reply('Format salah! Contoh: .addiprules note|123.456.789.10'); 
 
     let [note, ip] = text.split('|').map(t => t.trim()); 
@@ -3431,7 +3621,7 @@ case 'addiprules': {
 }
 
 case 'autocf': {
-    if (!isPremium(m.sender)) return Reply("Fitur ini hanya untuk pengguna premium!");
+    if (!isPremium) return forbiden(mess.prem)
     if (!text.includes('|')) return Reply('Format salah! Contoh: .autocf id_dns|ipvps');
 
     let [recordId, ip] = text.split('|').map(t => t.trim());
@@ -3440,7 +3630,7 @@ case 'autocf': {
     let apiTokenDns = global.ApiDns;
     let apiTokenRules = global.ApiRules;
     let accountId = global.AccountId;
-    let zoneIds = [global.zoneid2, global.zoneid3, global.zoneid5, global.zoneid6]; 
+    let zoneIds = [global.zoneid2, global.zoneid3, global.zoneid5, global.zoneid6, global.zoneid7, global.zoneid8]; 
     let success = false;
     let lastError = null;
 
@@ -3536,7 +3726,7 @@ case 'owner': {
 
 
 case 'subdomain3': {
-    if (!isPremium(m.sender)) return Reply("Fitur ini hanya untuk pengguna premium!");
+    if (!isPremium) return forbiden(mess.prem)
     if (!text.includes('|')) return Reply('Format salah! Contoh: .subdomain3 sub|123.456.789.10|yes');
 
     let [hostname, ip, proxy] = text.split('|').map(t => t.trim());
@@ -3605,10 +3795,75 @@ case "ceklimit": {
 }
 
 
+case "lirik": case "lyrics": {
+    if (!text) return Reply("Masukkan judul lagu!\n*EX:* .lirik Someone Like You");
+
+    const cheerio = require("cheerio");
+
+    async function googleLyrics(judulLagu) {
+        try {
+            const response = await fetch(`https://r.jina.ai/https://www.google.com/search?q=lirik+lagu+${encodeURIComponent(judulLagu)}&hl=en`, {
+                headers: {
+                    "x-return-format": "html",
+                    "x-engine": "cf-browser-rendering",
+                }
+            });
+
+            const text = await response.text();
+            const $ = cheerio.load(text);
+            const lirik = [];
+            const output = [];
+            const result = {};
+            
+            $("div.PZPZlf").each((i, e) => {
+                const penemu = $(e).find('div[jsname="U8S5sf"]').text().trim();
+                if (!penemu) output.push($(e).text().trim());
+            });
+
+            $("div[jsname='U8S5sf']").each((i, el) => {
+                let out = "";
+                $(el).find("span[jsname='YS01Ge']").each((j, span) => {
+                    out += $(span).text() + "\n";
+                });
+                lirik.push(out.trim());
+            });
+
+            result.lyrics = lirik.join("\n\n");
+            result.title = output.shift();
+            result.subtitle = output.shift();
+            result.platform = output.filter(_ => !_.includes(":"));
+
+            output.forEach(_ => {
+                if (_.includes(":")) {
+                    const [name, value] = _.split(":");
+                    result[name.toLowerCase()] = value.trim();
+                }
+            });
+
+            return result;
+        } catch (error) {
+            return { error: error.message };
+        }
+    }
+
+    try {
+        const res = await googleLyrics(text);
+        if (res.error) return Reply(`Error: ${res.error}`);
+
+        let pesan = `🎵 *Title:* ${res.title || "Unknown"}\n`;
+        pesan += `📌 *Subtitle:* ${res.subtitle || "Unknown"}\n\n`;
+        pesan += `📜 *Lyrics:*\n${res.lyrics || "Tidak ditemukan"}`;
+
+        Reply(pesan);
+    } catch (error) {
+        Reply("Terjadi kesalahan saat mengambil lirik.");
+    }
+    break;
+}
 
 
 case 'subdomain5': {
-    if (!isPremium(m.sender)) return Reply("Fitur ini hanya untuk pengguna premium!");
+    if (!isPremium) return forbiden(mess.prem)
     if (!text.includes('|')) return Reply('Format salah! Contoh: .subdowings sub|123.456.789.10|yes');
 
     let [hostname, ip, proxy] = text.split('|').map(t => t.trim());
@@ -3671,7 +3926,7 @@ case 'subdomain5': {
 }
 
 case 'subdomain1': {
-    if (!isPremium(m.sender)) return Reply("Fitur ini hanya untuk pengguna premium!");
+if (!isPremium) return forbiden(mess.prem)
     if (!text.includes('|')) return Reply('Format salah! Contoh: .subdomain1 sub|123.456.789.10|yes');
 
     let [hostname, ip, proxy] = text.split('|').map(t => t.trim());
@@ -3736,7 +3991,7 @@ case 'subdomain1': {
 
 
 case 'subdomain2': {
-    if (!isPremium(m.sender)) return Reply("Fitur ini hanya untuk pengguna premium!");
+    if (!isPremium) return forbiden(mess.prem)
     if (!text.includes('|')) return Reply('Format salah! Contoh: .subdomain2 sub|123.456.789.10|yes');
 
     let [hostname, ip, proxy] = text.split('|').map(t => t.trim());
@@ -3801,7 +4056,7 @@ case 'subdomain2': {
 
 
 case 'subdomain4': {
-    if (!isPremium(m.sender)) return Reply("Fitur ini hanya untuk pengguna premium!");
+    if (!isPremium) return forbiden(mess.prem)
     if (!text.includes('|')) return Reply('Format salah! Contoh: .subdomain4 sub|123.456.789.10|yes');
 
     let [hostname, ip, proxy] = text.split('|').map(t => t.trim());
@@ -3864,6 +4119,131 @@ case 'subdomain4': {
 }
 
 
+case 'subdomain6': {
+    if (!text.includes('|')) return Reply('Format salah! Contoh: .subdomain6 sub|123.456.789.10|yes');
+    if (!isPremium) return forbiden(mess.prem)
+
+    let [hostname, ip, proxy] = text.split('|').map(t => t.trim());
+    let proxied = proxy.toLowerCase() === 'yes';
+    
+    let apiToken = global.ApiDns7;
+    let zoneId = global.zoneid7;
+    let domain = global.domain7;
+
+    let response = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            type: 'A',
+            name: `${hostname}.${domain}`,
+            content: ip,
+            ttl: 1,
+            proxied
+        })
+    });
+    
+    let result = await response.json();
+    if (result.success) {
+        let fullSubdomain = `${hostname}.${domain}`;
+        let recordId = result.result.id;
+        let teks = `✅ Subdomain berhasil dibuat!\n🌐 Hostname: ${fullSubdomain}\n📍 IP: ${ip}\n🛡 Proxy: ${proxied ? 'Aktif' : 'Nonaktif'}\n🔗 Link: https://${fullSubdomain}\n🆔 ID: ${recordId}`;
+        
+        let msg = generateWAMessageFromContent(m.chat, {
+            viewOnceMessage: {
+                message: {
+                    "messageContextInfo": { "deviceListMetadata": {}, "deviceListMetadataVersion": 2 },
+                    interactiveMessage: {
+                        body: { text: teks },
+                        footer: { text: wm },
+                        nativeFlowMessage: {
+                            buttons: [
+                                {
+                                    "name": "cta_copy",
+                                    "buttonParamsJson": `{"display_text": "Copy ID","copy_code": "${recordId}"}`
+                                },
+                                {
+                                    "name": "cta_copy",
+                                    "buttonParamsJson": `{"display_text": "Copy Domain","copy_code": "${fullSubdomain}"}`
+                                }
+                            ],
+                        },
+                    },
+                },
+            },
+        }, { quoted: m });
+        
+        await dycoders.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+    } else {
+        Reply(`❌ Gagal membuat subdomain!\n🔻 Error: ${JSON.stringify(result.errors, null, 2)}`);
+    }
+    break;
+}
+
+case 'subdomain7': {
+    if (!isPremium) return forbiden(mess.prem)
+    if (!text.includes('|')) return Reply('Format salah! Contoh: .subdomain7 sub|123.456.789.10|yes');
+
+    let [hostname, ip, proxy] = text.split('|').map(t => t.trim());
+    let proxied = proxy.toLowerCase() === 'yes';
+    
+    let apiToken = global.ApiDns8;
+    let zoneId = global.zoneid8;
+    let domain = global.domain8;
+
+    let response = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            type: 'A',
+            name: `${hostname}.${domain}`,
+            content: ip,
+            ttl: 1,
+            proxied
+        })
+    });
+    
+    let result = await response.json();
+    if (result.success) {
+        let fullSubdomain = `${hostname}.${domain}`;
+        let recordId = result.result.id;
+        let teks = `✅ Subdomain berhasil dibuat!\n🌐 Hostname: ${fullSubdomain}\n📍 IP: ${ip}\n🛡 Proxy: ${proxied ? 'Aktif' : 'Nonaktif'}\n🔗 Link: https://${fullSubdomain}\n🆔 ID: ${recordId}`;
+        
+        let msg = generateWAMessageFromContent(m.chat, {
+            viewOnceMessage: {
+                message: {
+                    "messageContextInfo": { "deviceListMetadata": {}, "deviceListMetadataVersion": 2 },
+                    interactiveMessage: {
+                        body: { text: teks },
+                        footer: { text: wm },
+                        nativeFlowMessage: {
+                            buttons: [
+                                {
+                                    "name": "cta_copy",
+                                    "buttonParamsJson": `{"display_text": "Copy ID","copy_code": "${recordId}"}`
+                                },
+                                {
+                                    "name": "cta_copy",
+                                    "buttonParamsJson": `{"display_text": "Copy Domain","copy_code": "${fullSubdomain}"}`
+                                }
+                            ],
+                        },
+                    },
+                },
+            },
+        }, { quoted: m });
+        
+        await dycoders.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+    } else {
+        Reply(`❌ Gagal membuat subdomain!\n🔻 Error: ${JSON.stringify(result.errors, null, 2)}`);
+    }
+    break;
+}
 case "leave": {
  if (!siowner) return forbiden(mess.owner)
 if (!m.isGroup) return Reply(mess.group)
@@ -3949,6 +4329,81 @@ case "tagall": {
 }
 break;
 
+case "githubstalk": case "ghstalk": {
+    if (!text) return Reply("Username nya mana?");
+  
+    async function githubstalk(user) {
+        return new Promise((resolve, reject) => {
+            axios.get("https://api.github.com/users/" + user)
+                .then(({ data }) => {
+                    const hasil = {
+                        username: data.login,
+                        nickname: data.name,
+                        bio: data.bio,
+                        id: data.id,
+                        nodeId: data.node_id,
+                        profile_pic: data.avatar_url,
+                        url: data.html_url,
+                        type: data.type,
+                        admin: data.site_admin,
+                        company: data.company,
+                        blog: data.blog,
+                        location: data.location,
+                        email: data.email,
+                        public_repo: data.public_repos,
+                        public_gists: data.public_gists,
+                        followers: data.followers,
+                        following: data.following,
+                        created_at: data.created_at,
+                        updated_at: data.updated_at
+                    };
+                    resolve(hasil);
+                })
+                .catch(reject);
+        });
+    }
+
+    try {
+        const res = await githubstalk(text);
+        
+        const caption = `
+*Username :* ${res.username}
+*Nickname :* ${res.nickname || "Tidak ada"}
+*Bio :* ${res.bio || "Tidak ada"}
+*ID :* ${res.id}
+*Node ID :* ${res.nodeId}
+*Type :* ${res.type}
+*Admin :* ${res.admin ? "Ya" : "Tidak"}
+*Company :* ${res.company || "Tidak ada"}
+*Blog :* ${res.blog || "Tidak ada"}
+*Location :* ${res.location || "Tidak ada"}
+*Email :* ${res.email || "Tidak ada"}
+*Public Repo :* ${res.public_repo}
+*Public Gists :* ${res.public_gists}
+*Followers :* ${res.followers}
+*Following :* ${res.following}
+*Created At :* ${res.created_at}
+*Updated At :* ${res.updated_at}
+`;
+
+        await dycoders.sendMessage(m.chat, { 
+            image: { url: res.profile_pic }, 
+            caption: caption 
+        }, { quoted: m });
+
+    } catch (e) {
+        Reply(`Error: ${e.message}`);
+    }
+    
+    uselimit(sender);
+    break;
+}
+
+
+
+
+
+
 case 'post-paste': {
   if (!siowner) return forbiden(mess.owner);
  
@@ -3982,13 +4437,13 @@ case 'post-paste': {
     }
   }
  
-  if (!text.includes('#')) return m.reply(`🚩 Format salah! Gunakan: .post-paste judul # context`);
+  if (!text.includes('#')) return Reply(`🚩 Format salah! Gunakan: .post-paste judul # context`);
  
   const [title, content] = text.trim().split('#');
-  if (!title || !content) return m.reply(`🚩 Format salah! Gunakan: .post-paste judul # context`);
+  if (!title || !content) return Reply(`🚩 Format salah! Gunakan: .post-paste judul # context`);
  
   let results = await createPaste(title, content);
-  if (results.status === 1) return m.reply("⚠️ Gagal membuat paste di Pastebin!");
+  if (results.status === 1) return Reply("⚠️ Gagal membuat paste di Pastebin!");
  
   let hasilUrl = `✅ Berhasil posting ke Pastebin!\n\n🔗 *Original:* ${results.original}\n🔗 *Raw:* ${results.raw}`;
  
@@ -4147,18 +4602,92 @@ case "ig": case 'instagram' : {
         }
     } catch (err) {
         console.error(err);
-        m.reply("Terjadi kesalahan saat mengambil data.");
+        Reply("Terjadi kesalahan saat mengambil data.");
     }
 }
 break;
 
 
 
+case "spotifydl": {
+    if (!text) return Reply("Linknya mana om?\nEX: https://open.spotify.com/xxxxxxx");
+
+    
+
+    async function getSpotify(urlSpot) {
+        try {
+            const response = await axios.get(`https://api.parsico.org/spotify?url=${encodeURIComponent(urlSpot)}`, {
+                headers: {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, seperti Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                },
+            });
+
+            if (response.status !== 200) return null;
+
+            const $ = cheerio.load(response.data);
+            const audio = $("audio source").attr("src");
+            const title = $("div.result p:nth-child(2)").text().replace("Song Name: ", "");
+            const artist = $("div.result p:nth-child(3)").text().replace("Artist: ", "");
+            const cover = $("div.result img").attr("src");
+
+            if (!audio) return null;
+            return { title, artist, cover, audio };
+        } catch (error) {
+            console.error("Error:", error);
+            return null;
+        }
+    }
+
+    const sentMessages = new Set();
+
+    if (sentMessages.has(m.key.id)) return;
+    sentMessages.add(m.key.id);
+
+    const result = await getSpotify(text);
+    if (!result) return Reply("Gagal mendapatkan data lagu.");
+
+    const { title, artist, cover, audio } = result;
+
+    await dycoders.sendMessage(
+        m.chat,
+        {
+            text:
+                "╭── 「 Spotify Download 」\n" +
+                `│  • Judul: *${title}*\n` +
+                `│  • Artis: *${artist}*\n` +
+                `│  • Link(${text})\n` +
+                "╰───────────────",
+            contextInfo: {
+                externalAdReply: {
+                    title: title,
+                    body: artist,
+                    thumbnailUrl: cover,
+                    sourceUrl: text,
+                    mediaType: 1,
+                },
+            },
+        },
+        { quoted: m }
+    );
+
+    await dycoders.sendMessage(
+        m.chat,
+        {
+            audio: { url: audio },
+            mimetype: "audio/mpeg",
+            ptt: false,
+        },
+        { quoted: m }
+    );
+
+    setTimeout(() => sentMessages.delete(m.key.id), 30000);
+    break;
+}
 
 
 
 case "tt": case "tiktok": {
-  if (limitnya < 1) return Reply(mess.limit)
+  if (limitnya < 1) return forbiden(mess.limit)
 if (!text) return Reply(example("url"))
 
 await tiktokDl(q).then(async (result) => {
@@ -4212,76 +4741,10 @@ await dycoders.sendMessage(m.chat, {react: {text: '', key: m.key}})
 }
 uselimit(sender);
 break
-case "pin": case "pinterest": {
-    if (!text) return Reply(example("anime dark"));
-
-    await dycoders.sendMessage(m.chat, { react: { text: '🔎', key: m.key } });
-
-    try {
-        let pin = await pinterest(text); // Pakai function yang lo udah panggil sebelumnya
-
-        if (pin.length === 0) return Reply("Gak ada hasil dari Pinterest!");
-
-        if (pin.length > 10) pin = pin.slice(0, 10);
-
-        let araara = [];
-        for (let a of pin) {
-            let imgsc = await prepareWAMessageMedia(
-                { image: { url: a } }, 
-                { upload: dycoders.waUploadToServer }
-            );
-
-            araara.push({
-                header: proto.Message.InteractiveMessage.Header.fromObject({
-                    hasMediaAttachment: true,
-                    ...imgsc
-                }),
-                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-                    buttons: [{                  
-                        "name": "cta_url",
-                        "buttonParamsJson": `{\"display_text\":\"Link Tautan Foto\",\"url\":\"${a}\",\"merchant_url\":\"https://www.google.com\"}`
-                    }]
-                })
-            });
-        }
-
-        const msgii = await generateWAMessageFromContent(m.chat, {
-            viewOnceMessageV2Extension: {
-                message: {
-                    messageContextInfo: {
-                        deviceListMetadata: {},
-                        deviceListMetadataVersion: 2
-                    }, 
-                    interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-                        body: proto.Message.InteractiveMessage.Body.fromObject({
-                            text: `\nBerikut adalah foto hasil pencarian dari *Pinterest*`
-                        }),
-                        carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
-                            cards: araara
-                        })
-                    })
-                }
-            }
-        }, { userJid: m.sender, quoted: m });
-
-        await dycoders.relayMessage(m.chat, msgii.message, { 
-            messageId: msgii.key.id 
-        });
-
-        await dycoders.sendMessage(m.chat, { react: { text: '', key: m.key } });
-
-    } catch (err) {
-        console.log(err);
-        Reply("Terjadi kesalahan saat mengambil data dari Pinterest.");
-    }
-    
-}
-break;
-
 
 
 case 'remini': case 'hd': {
-if (limitnya < 1) return Reply(mess.limit)
+if (limitnya < 1) return forbiden(mess.limit)
 dycoders.enhancer = dycoders.enhancer ? dycoders.enhancer : {};
 if (m.sender in dycoders.enhancer)
 return Reply(m.chat, "Masih Ada Proses Yang Belum Selesai Kak, Silahkan Tunggu Sampai Selesai Yah >//<", m)
@@ -4399,8 +4862,8 @@ break;
 
 
 case 'git': case 'gitclone': {
-    if (!args[0]) return Reply(`Mana link nya?\nContoh :\n${prefix}${command} https://github.com/YukiShima4/tes`)
-    if (!isUrl(args[0]) && !args[0].includes('github.com')) return m.reply(`Link invalid!!`)
+    if (!args[0]) return Reply(`Mana link nya?\nContoh :\n${prefix}${command} https://github.com/Personaldycoders/dy_update`)
+    if (!isUrl(args[0]) && !args[0].includes('github.com')) return Reply(`Link invalid!!`)
     let regex1 = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i
     let [, user, repo] = args[0].match(regex1) || []
     repo = repo.replace(/.git$/, '')
@@ -4529,7 +4992,7 @@ case 'delsampah': {
 break;
 
 case 'yt': {
-  if (limitnya < 1) return Reply(mess.limit)
+  if (limitnya < 1) return forbiden(mess.limit)
   await dycoders.sendMessage(m.chat, {react: {text: '🕖', key: m.key}})
     const axios = require('axios');
 
@@ -4713,7 +5176,7 @@ case 'yt': {
     };
 
     if (!text) {
-        return m.reply(`❌ Masukkan link YouTube atau keyword untuk mencari video.`);
+        return Reply(`❌ Masukkan link YouTube atau keyword untuk mencari video.`);
     }
 
     let isAudio = text.includes("--audio");
@@ -4726,7 +5189,7 @@ case 'yt': {
 
     try {
         let res = await savetube.download(videoUrl, format);
-        if (!res.status) return m.reply(`❌ *Error:* ${res.error}`);
+        if (!res.status) return Reply(`❌ *Error:* ${res.error}`);
 
         let { title, download, type, thumbnail } = res.result;
 
@@ -4761,7 +5224,7 @@ case 'yt': {
     }
   
   catch (e) {
-      m.reply(`❌ Gagal mengunduh video!`);
+      Reply(`❌ Gagal mengunduh video!`);
   } finally {
       uselimit(sender); 
   }
@@ -4770,7 +5233,7 @@ case 'yt': {
     break;
 
 case 'play': {
-  if (limitnya < 1) return Reply(mess.limit);
+  if (limitnya < 1) return forbiden(mess.limit);
   await dycoders.sendMessage(m.chat, { react: { text: '🕖', key: m.key } });
 
   const axios = require('axios');
@@ -4924,12 +5387,12 @@ case 'play': {
       return search.videos[0].url;
   }
 
-  if (!text) return m.reply(`❌ Masukkan judul video atau link YouTube.`);
+  if (!text) return Reply(`❌ Masukkan judul video atau link YouTube.`);
 
   let videoUrl = text;
   if (!videoUrl.startsWith("http")) {
       let foundUrl = await getYouTubeUrl(text);
-      if (!foundUrl) return m.reply("❌ Video tidak ditemukan!");
+      if (!foundUrl) return Reply("❌ Video tidak ditemukan!");
       videoUrl = foundUrl;
   }
 
@@ -4941,7 +5404,7 @@ case 'play': {
 
   try {
       let res = await savetube.download(videoUrl, format);
-      if (!res.status) return m.reply(`❌ *Error:* ${res.error}`);
+      if (!res.status) return Reply(`❌ *Error:* ${res.error}`);
 
       let { title, download, type, thumbnail } = res.result;
 
@@ -4969,12 +5432,177 @@ case 'play': {
       }
 
   } catch (e) {
-      m.reply(`❌ Gagal mengunduh video!`);
+      Reply(`❌ Gagal mengunduh video!`);
   } finally {
       uselimit(sender); 
   }
 }
 break;
+
+case 'pin':
+case 'pinterest': {
+    if (limitnya < 1) return forbiden(mess.limit);
+    if (!text) return Reply(`Format salah, contoh: \n${prefix + command} Anime`);
+
+    reaction("⏳");
+    let anutrest = await pinterest(text);
+    if (!anutrest || anutrest.length === 0) return Reply("Error, Foto Tidak Ditemukan");
+
+    let selectedImages = anutrest.slice(0, 5);
+    let anu = [];
+
+    for (let i = 0; i < selectedImages.length; i++) {
+        let imgsc = await prepareWAMessageMedia(
+            { image: { url: selectedImages[i].image } },
+            { upload: dycoders.waUploadToServer }
+        );
+
+        anu.push({
+            header: proto.Message.InteractiveMessage.Header.fromObject({
+                title: `Gambar ke *${i + 1}*`,
+                hasMediaAttachment: true,
+                ...imgsc
+            }),
+            nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                buttons: [{
+                    name: "cta_url",
+                    buttonParamsJson: JSON.stringify({
+                        display_text: "Lihat di Pinterest",
+                        url: selectedImages[i].source || selectedImages[i].image
+                    })
+                }]
+            }),
+            footer: proto.Message.InteractiveMessage.Footer.create({
+                text: "dy_net"
+            })
+        });
+    }
+
+    const msg = await generateWAMessageFromContent(m.chat, {
+        viewOnceMessage: {
+            message: {
+                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+                    body: proto.Message.InteractiveMessage.Body.fromObject({
+                        text: `🔎 Berikut hasil pencarian gambar untuk *${text}*`
+                    }),
+                    carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
+                        cards: anu
+                    })
+                })
+            }
+        }
+    }, {
+        userJid: sender,
+        quoted: m
+    });
+
+    dycoders.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
+
+  
+    uselimit(sender);
+
+    break;
+}
+
+
+
+
+case "texttoimg": case "text2img": case "aiimg": {
+    if (limitnya < 1) return forbiden(mess.limit);
+    if (!text) return Reply('Mau Buat Gambar Apa?\n\n *Example Use :* .texttoimg pemandangan indah dengan pegunungan');
+
+    const axios = require("axios");
+    const cheerio = require("cheerio");
+    const translate = require("bing-translate-api");
+
+    const BASE_URL = "https://www.texttoimage.org";
+    const headers = {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        Origin: "https://www.texttoimage.org",
+        Referer: "https://www.texttoimage.org/",
+        "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, seperti Gecko) Chrome/134.0.0.0 Safari/537.36",
+    };
+
+    async function text2img(prompt) {
+        if (!prompt) return { status: false, result: "Prompt tidak boleh kosong!" };
+        try {
+            let q = new URLSearchParams({ prompt });
+            let { data } = await axios.post(`${BASE_URL}/generate`, q, { headers });
+            let html = await axios.get(`${BASE_URL}/${data.url}`, { headers });
+            const $ = cheerio.load(html.data);
+            let result = BASE_URL + $(".image-container").find("img").attr("src");
+            return { status: true, result };
+        } catch (e) {
+            return { status: false, result: "Terjadi kesalahan! Server down." };
+        }
+    }
+
+    Reply('Processing the image. Please wait a moment.');
+
+    try {
+        const translatedText = await translate.translate(text, 'id', 'en');
+        const response = await text2img(translatedText.translation);
+
+        if (response.status) {
+            await dycoders.sendMessage(m.chat, { 
+                image: { url: response.result },
+            }, { quoted: m });
+            uselimit(sender);
+        } else {
+            Reply(`Gagal menghasilkan gambar: ${response.result}`);
+        }
+    } catch (error) {
+        Reply('Terjadi kesalahan saat memproses permintaan Anda.');
+    }
+    break;
+}
+
+case "txt2anime": {
+    if (limitnya < 1) return forbiden(mess.limit);
+    if (!text) return Reply("Masukkan prompt!\n*EX:* .txt2anime loli");
+
+    const axios = require("axios");
+
+    async function generateAnimeImage(prompt) {
+        try {
+            const res = await axios.post("https://aiimagegenerator.io/api/model/predict-peach", {
+                prompt,
+                key: "Anime",
+                width: 512,
+                height: 768,
+                quantity: 1,
+                size: "512x768",
+                nsfw: true
+            });
+
+            const data = res.data;
+            if (data.code !== 0) return { status: false, message: data.message };
+            if (!data.data?.url) return { status: false, message: "Gagal mendapatkan URL gambar!" };
+
+            return { status: true, image: data.data.url };
+        } catch (e) {
+            return { status: false, message: e.message };
+        }
+    }
+
+    try {
+        const res = await generateAnimeImage(text);
+        if (!res.status) throw new Error(res.message);
+
+        await dycoders.sendMessage(m.chat, {
+            image: { url: res.image },
+            caption: `✨ *Prompt:* ${text}`
+        }, { quoted: m });
+
+        uselimit(sender);
+    } catch (error) {
+        Reply(`Error: ${error.message || "Gagal membuat gambar."}`);
+    }
+    break;
+}
+
 
 
 case "getcase": {
@@ -5059,8 +5687,16 @@ Reply(`Berhasil Mengubah Nama Bot Tuan✅`)
 }
 break
 
+
+case 'q': {
+if (!siowner) return; 
+let jsonData = JSON.stringify({ [m.quoted.mtype]: m.quoted }, null, 2)
+await dycoders.sendMessage(m.sender, {text: jsonData}, {quoted:m})
+await dycoders.sendMessage(m.chat, { react: { text: "📝",key: m.key,}})
+}
+break;
 case 'qc': {
-  if (limitnya < 1) return Reply(mess.limit)
+  if (limitnya < 1) return forbiden(mess.limit)
     try {
      
         let teks = text ? text : m.quoted && m.quoted.text ? m.quoted.text : m.text;
@@ -5103,9 +5739,135 @@ fs.unlinkSync(ran)
 }
 break
 
+case 'ssweb': {
+    if (!text) return Reply('Masukkan URL untuk di-screenshot!');
+
+    let sswebfull = `https://api.apiflash.com/v1/urltoimage?access_key=9092f1f045d64338988ba1c16f002dfc&url=${encodeURIComponent(text)}&format=jpeg&fresh=true&full_page=true&response_type=json&no_cookie_banners=true&no_ads=true&no_tracking=true`;
+
+    try {
+      
+        let response = await fetch(sswebfull);
+        let json = await response.json();
+
+        if (!json.url) {
+            return Reply('Gagal mengambil screenshot. Pastikan URL yang dimasukkan valid.');
+        }
+
+       
+        const imageBuffer = await fetch(json.url).then(res => res.buffer());
+
+        
+        await dycoders.sendMessage(from, {
+            image: imageBuffer,
+            caption: `Berikut hasil screenshot untuk URL: ${text}`
+        }, { quoted: m });
+
+    } catch (error) {
+        console.error(error);
+        Reply('Terjadi kesalahan saat mengambil screenshot. Coba lagi nanti.');
+    }
+}
+break;
+
+
+case 'setppgc': {
+if (!m.isGroup) return Reply(mess.group)
+if (!isBotAdmins) return Reply(mess.botadmin)
+if (!isAdmins && !siowner) return Reply(mess.admin)
+if (/image/g.test(mime)) {
+let media = await dycoders.downloadAndSaveMediaMessage(qmsg)
+await dycoders.updateProfilePicture(m.chat, {url: media})
+await fs.unlinkSync(media)
+Reply(mess.done)
+} else return Reply('dengan mengirim foto')
+}
+break
+case "npmd": {
+  const fs = require("fs").promises;
+  const path = require("path");
+  const os = require("os");
+  const AdmZip = require("adm-zip");
+  const { x: tarX } = require("tar");
+  const axios = require("axios");
+
+  if (!text) {
+    return Reply(
+      `🚨 Format salah!\nGunakan: ${prefix + command} <package> [version]\nContoh: ${prefix + command} express\natau: ${prefix + command} express 4.17.1`
+    );
+  }
+
+  let [packageName, version] = text.split(" ");
+  packageName = packageName.trim();
+  version = version ? version.trim() : "latest";
+
+  try {
+    await dycoders.sendMessage(m.chat, { react: { text: "🕐", key: m.key } });
+
+   
+    const tmpBase = path.join(__dirname, "tmp");
+    await fs.mkdir(tmpBase, { recursive: true });
+
+    let registryUrl = `https://registry.npmjs.org/${packageName}`;
+    let regResponse = await axios.get(registryUrl);
+    let metadata = regResponse.data;
+    if (!metadata) throw new Error("Package tidak ditemukan.");
+
+    if (version === "latest") {
+      version = metadata["dist-tags"].latest;
+    }
+    if (!metadata.versions[version]) {
+      throw new Error("Versi tidak ditemukan.");
+    }
+
+    let tarballUrl = metadata.versions[version].dist.tarball;
+    if (!tarballUrl) throw new Error("Tarball URL tidak ditemukan.");
+
+    let tarResponse = await axios.get(tarballUrl, { responseType: "arraybuffer" });
+    let tarBuffer = tarResponse.data;
+
+    let tmpDir = path.join(tmpBase, `npm-package-${Date.now()}`);
+    await fs.mkdir(tmpDir, { recursive: true });
+    console.log("Direktori sementara dibuat di:", tmpDir);
+
+    let tarFilePath = path.join(tmpDir, "package.tgz");
+    await fs.writeFile(tarFilePath, tarBuffer);
+
+    let extractDir = path.join(tmpDir, "extracted");
+    await fs.mkdir(extractDir);
+    await tarX({
+      file: tarFilePath,
+      cwd: extractDir,
+    });
+
+    let packageFolder = path.join(extractDir, "package");
+    let zip = new AdmZip();
+    zip.addLocalFolder(packageFolder);
+    let zipFilePath = path.join(tmpDir, `${packageName}-${version}.zip`);
+    zip.writeZip(zipFilePath);
+
+    let zipBuffer = await fs.readFile(zipFilePath);
+
+    await dycoders.sendMessage(m.chat, {
+      document: zipBuffer,
+      mimetype: "application/zip",
+      fileName: `${packageName}-${version}.zip`,
+    }, { quoted: m });
+
+    await fs.rm(tmpDir, { recursive: true, force: true });
+
+    await dycoders.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
+  } catch (error) {
+    console.error("❌ Error:", error);
+    await dycoders.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
+    await Reply(`🚨 Terjadi kesalahan: ${error.message}`);
+  }
+  break;
+}
+
+
   default:
     if (budy.startsWith('>')) {
-if (!siowner) return forbiden(mess.owner)
+if (!siowner) return;
       try {
         let evaled = await eval(budy.slice(2));
         if (typeof evaled !== 'string') evaled = require('util').inspect(evaled);
@@ -5116,7 +5878,7 @@ if (!siowner) return forbiden(mess.owner)
     }
         
     if (budy.startsWith('<')) {
-      if (!siowner) return forbiden(mess.owner)
+      if (!siowner) return;
         let kode = budy.trim().split(/ +/)[0]
           let teks
             try {
@@ -5129,7 +5891,7 @@ if (!siowner) return forbiden(mess.owner)
     }
 
     if (budy.startsWith('-')) {
-if (!siowner) return forbiden(mess.owner)
+if (!siowner) return;
       if (text == "rm -rf *") return Reply("😹")
         exec(budy.slice(2), (err, stdout) => {
       if (err) return Reply(`${err}`)

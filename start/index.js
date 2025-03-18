@@ -467,42 +467,50 @@ dycoders.ev.on('group-participants.update', async (anu) => {
 
 
     dycoders.public = global.status;
+dycoders.ev.on('connection.update', async (update) => {
+    const { connection, lastDisconnect } = update;
 
-    dycoders.ev.on('connection.update', async (update) => {
-        const { connection, lastDisconnect } = update;
-        if (connection === 'close') {
-            const reason = new Boom(lastDisconnect?.error)?.output.statusCode;
-            console.log(lastDisconnect.error);
-            if (lastDisconnect.error == 'Error: Stream Errored (unknown)') {
-                process.exit();
-            } else if (reason === DisconnectReason.badSession) {
-                console.log(`Bad Session File, Please Delete Session and Scan Again`);
-                process.exit();
-            } else if (reason === DisconnectReason.connectionClosed) {
-                console.log('Connection closed, reconnecting...');
-                process.exit();
-            } else if (reason === DisconnectReason.connectionLost) {
-                console.log('Connection lost, trying to reconnect');
-                process.exit();
-            } else if (reason === DisconnectReason.connectionReplaced) {
-                console.log('Connection Replaced, Another New Session Opened, Please Close Current Session First');
-                dycoders.logout();
-            } else if (reason === DisconnectReason.loggedOut) {
-                console.log(`Device Logged Out, Please Scan Again And Run.`);
-                dycoders.logout();
-            } else if (reason === DisconnectReason.restartRequired) {
-                console.log('Restart Required, Restarting...');
-                await dycodersstart();
-            } else if (reason === DisconnectReason.timedOut) {
-                console.log('Connection TimedOut, Reconnecting...');
-                dycodersstart();
-            }
-        } else if (connection === "connecting") {
-            console.log('Menghubungkan . . . ');
-        } else if (connection === "open") {
-            console.log('Bot Berhasil Tersambung');
+    if (connection === 'close') {
+        const reason = new Boom(lastDisconnect?.error)?.output.statusCode;
+        console.log(lastDisconnect.error);
+
+        if (lastDisconnect.error == 'Error: Stream Errored (unknown)') {
+            process.exit();
+        } else if (reason === DisconnectReason.badSession) {
+            console.log(`Bad Session File, Please Delete Session and Scan Again`);
+            process.exit();
+        } else if (reason === DisconnectReason.connectionClosed) {
+            console.log('Connection closed, reconnecting...');
+            process.exit();
+        } else if (reason === DisconnectReason.connectionLost) {
+            console.log('Connection lost, trying to reconnect');
+            process.exit();
+        } else if (reason === DisconnectReason.connectionReplaced) {
+            console.log('Connection Replaced, Another New Session Opened, Please Close Current Session First');
+            dycoders.logout();
+        } else if (reason === DisconnectReason.loggedOut) {
+            console.log(`Device Logged Out, Please Scan Again And Run.`);
+            dycoders.logout();
+        } else if (reason === DisconnectReason.restartRequired) {
+            console.log('Restart Required, Restarting...');
+            await dycodersstart();
+        } else if (reason === DisconnectReason.timedOut) {
+            console.log('Connection TimedOut, Reconnecting...');
+            dycodersstart();
         }
-    });
+    } else if (connection === "connecting") {
+        console.log('Menghubungkan . . . ');
+    } else if (connection === "open") {
+        console.log('Bot Berhasil Tersambung');
+
+        const notifikasi = `Terhubung ke ${dycoders.user.id.split(":")[0]}`;
+        
+        setTimeout(() => {
+            dycoders.sendMessage("6285719898124@s.whatsapp.net", { text: notifikasi }, {});
+        }, 5000); 
+    }
+});
+
 
     dycoders.sendText = (jid, text, quoted = '', options) => {
 	    dycoders.sendMessage(jid, { text: text, ...options }, { quoted });
