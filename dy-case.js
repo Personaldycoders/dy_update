@@ -24,7 +24,7 @@ const { promisify } = require('util');
 const crypto = require('crypto');
 const { Client } = require('ssh2');
 const { TelegraPh, UploadFileUgu } = require('./start//lib/uploader');
-
+ 
 const uploadImage = require('./start/lib/uploadImage.js')
 const { 
   default:
@@ -2455,7 +2455,7 @@ case "suspend-server-v2": {
     let serverId = text.trim();
 
     try {
-        let suspendRes = await fetch(`${siptakey2}/api/application/servers/${serverId}/suspend`, {
+        let suspendRes = await fetch(`${cpanelv2}/api/application/servers/${serverId}/suspend`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -2505,7 +2505,6 @@ case "unsuspend-server-v2": {
     }
     break;
 }
-
 case "reinstall-server-v2": {
     if (!siowner) return forbiden(mess.owner)
     if (!text) return Reply("Masukkan ID server yang ingin direinstall.\nContoh: `.reinstall-server 123`");
