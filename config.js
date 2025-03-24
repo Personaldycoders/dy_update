@@ -4,6 +4,7 @@ global.rowner = [["6285719898124", "dycoders.xyz", true], ["6285719898124", "dyc
 global.owner = "6285719898124"
 global.status = true
 global.welcome = true;
+global.autoread = true
 global.wm = "dycoders.xyz" 
 global.botname = 'dy_net'
 global.packname = 'dy_net'

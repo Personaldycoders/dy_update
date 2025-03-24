@@ -14,11 +14,13 @@ const util = require("util");
 const path = require("path")
 const moment = require("moment-timezone");
 const sharp = require('sharp');
+const cp = require('child_process');
 const {
   spawn,
   exec, 
   execSync 
 } = require('child_process');
+const { promisify } = require('util');
 const crypto = require('crypto');
 const { Client } = require('ssh2');
 const { TelegraPh, UploadFileUgu } = require('./start//lib/uploader');
@@ -42,6 +44,8 @@ const { ok } = require('assert');
 
 module.exports = dycoders = async (dycoders, m, chatUpdate, store) => {
   try {
+    
+
     const body = (
       m.mtype === "conversation" ? m.message.conversation :
       m.mtype === "imageMessage" ? m.message.imageMessage.caption :
@@ -57,6 +61,15 @@ const siowner = [dycoders.decodeJid(dycoders.user.id), ...global.rowner.map(([nu
 const premium = fs.readFileSync('./start/lib/database/prem.json').toString()
 const prem = JSON.parse(fs.readFileSync('./start/lib/database/prem.json').toString())
 const isPremium = siowner ? true : [premium, ...prem].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
+
+
+//Reseller function
+const reseller = fs.readFileSync('./start/lib/database/reseller.json').toString()
+const ress = JSON.parse(fs.readFileSync('./start/lib/database/reseller.json').toString())
+const isreseller = siowner ? true : [premium, ...ress].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
+
+
+
 const own = JSON.parse(fs.readFileSync('./start/lib/database/owner.json').toString())
 const sender = m.key.fromMe || [dycoders.decodeJid(dycoders.user.id), ...global.rowner.map(([number]) => number)]
     .map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
@@ -67,15 +80,21 @@ const sender = m.key.fromMe || [dycoders.decodeJid(dycoders.user.id), ...global.
 
 
     const senderNumber = sender.split('@')[0];
-    const budy = (typeof m.text === 'string' ? m.text : '');
+const budy = (typeof m.text === 'string' ? m.text : '');
 
+    
+    
+    
     const from = m.key.remoteJid;
     const isGroup = from.endsWith("@g.us");
     const kontributor = JSON.parse(fs.readFileSync('./start/lib/database/owner.json'));
     const tumbn = global.tumb
 const thumbnail = tumbn[Math.floor(Math.random() * tumbn.length)];
     const botNumber = await dycoders.decodeJid(dycoders.user.id);
+const user_ban = JSON.parse(fs.readFileSync('./start/lib/database/banned.json'))
 
+ const isBan = user_ban.includes(m.sender)
+ if (isBan && !isCmd) return;
 const prefix = ".";  
 const isCmd = body.startsWith(prefix);  
 const command = isCmd ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase() : null;
@@ -125,6 +144,17 @@ const formatp = (bytes) => {
 };
 
 
+if (!m.key.fromMe && global.autoread) {
+     const readkey = {
+         remoteJid: m.chat,
+         id: m.key.id,
+         participant: m.isGroup ? m.key.participant : undefined
+     }
+     await dycoders.readMessages([readkey]);
+ }
+        dycoders.sendPresenceUpdate('available', m.chat)
+      
+
 async function getCookies() {
     try {
         const response = await axios.get('https://www.pinterest.com/csrf_error/');
@@ -144,6 +174,48 @@ async function getCookies() {
         console.error('Error fetching cookies:', error);
         return null;
     }
+}
+
+function tiktoks(query) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await axios({
+        method: 'POST',
+        url: 'https://tikwm.com/api/feed/search',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'Cookie': 'current_language=en',
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36'
+        },
+        data: {
+          keywords: query,
+          count: 50,
+          cursor: 0,
+          HD: 1
+        }
+      });
+
+      const videos = response.data.data.videos;
+      if (!videos || videos.length === 0) {
+        reject("Tidak ada video ditemukan.");
+      } else {
+        const gywee = Math.floor(Math.random() * videos.length);
+        const videorndm = videos[gywee];
+
+        const result = {
+          title: videorndm.title,
+          cover: videorndm.cover,
+          origin_cover: videorndm.origin_cover,
+          no_watermark: videorndm.play,
+          watermark: videorndm.wmplay,
+          music: videorndm.music
+        };
+        resolve(result);
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 async function pinterest(query) {
@@ -407,22 +479,6 @@ async function forbiden(text) {
 
 
 
-const resellerFile = path.join(__dirname, './start/lib/database/reseller.json');
-
-function loadReseller() {
-    if (!fs.existsSync(resellerFile)) fs.writeFileSync(resellerFile, JSON.stringify([]));
-    return JSON.parse(fs.readFileSync(resellerFile));
-}
-
-function saveReseller(data) {
-    fs.writeFileSync(resellerFile, JSON.stringify(data, null, 2));
-}
-
-function isReseller(user) {
-    let resellers = loadReseller();
-    return resellers.includes(user);
-}
-
 const dbPath = path.join(__dirname, './start/lib/database/pendaftar.json');
 
 function loadDB() {
@@ -481,6 +537,9 @@ function addLimit(sender, jumlah) {
 }
 let limitnya = getLimit(sender);
 let limit = getLimit(m.sender);
+const penggunaan = (teks) => {
+return `Penggunaan :\n\n${prefix + command} *${teks}*`
+}
 const totalFitur = () =>{
             var mytext = fs.readFileSync("./dy-case.js").toString()
             var numUpper = (mytext.match(/case '/g) || []).length;
@@ -618,7 +677,7 @@ _Bot ini dikembangkan oleh_ *dycoders.xyz*
 
 ╭───〔 *INFO BOT* 〕───✧  
 │ 📛 *Bot Name:*  ${botname}  
-│ 🔢 *Version:*  1.1.1  
+│ 🔢 *Version:*  1.1.2  
 │ 🌐 *Mode:*  ${mode}  
 │ 🧑‍💻 *Creator:*  dycoders.xyz  
 │ 💳 *Limit Anda:*  ${limit}  
@@ -646,7 +705,7 @@ const cpanelnya = `
 
 📌 *informasi bot:*  
 ┣╾📛 *botname:* ${botname}  
-┣╾🔢 *version:* 1.1.1
+┣╾🔢 *version:* 1.1.2
 ┣╾🌐 *mode:* ${mode}  
 ┣╾🧑‍💻 *creator:* dycoders.xyz  
 ┗━━━━━━━━━━━━━━━━━━┛  
@@ -668,6 +727,10 @@ const cpanelnya = `
 ┣╾ .delusr  
 ┣╾ .delallsrv 1,2,3  
 ┣╾ .createadmin/adp
+┣╾ .suspend-server id
+┣╾ .unsuspend-server id
+┣╾ .reinstall-server id
+┣╾ .addsrv speck,iduser
 ┗━━━━━━━━━━━━━━━━━━┛  
 
 `
@@ -681,7 +744,7 @@ const cpnelnyav2 = `
 
 📌 *informasi bot:*  
 ┣╾📛 *botname:* ${botname}  
-┣╾🔢 *version:* 1.1.1
+┣╾🔢 *version:* 1.1.2
 ┣╾🌐 *mode:* ${mode}  
 ┣╾🧑‍💻 *creator:* dycoders.xyz  
 ┗━━━━━━━━━━━━━━━━━━┛  
@@ -703,148 +766,153 @@ const cpnelnyav2 = `
 ┣╾ .delusr-v2
 ┣╾ .delallsrv-v2 1,2,3  
 ┣╾ .createadmin-v2/adp-v2
+┣╾ .suspend-server-v2 id
+┣╾ .unsuspend-server-v2 id
+┣╾ .reinstall-server-v2 id
+┣╾ .addsrv-2 speck,iduser
 ┗━━━━━━━━━━━━━━━━━━┛  
 
 `
 
 
+const allmenu = `[ DY_NET BOT ]  
+╭──────────────╮  
+│ Halo, ${m.pushName}! Selamat datang!  
+│ Saya adalah Dy_Net Bot  
+│ Dikembangkan oleh dycoders.xyz  
+│ Limit Anda: ${limit}  
+│ Status: ${siowner ? "Owner" : isPremium ? "Premium" : "Free"}  
+╰──────────────╯  
 
-const allmenu = ` 
-┌─〔 🤖 *DY_NET BOT* 〕─┐  
-│ 👋 *Halo, ${m.pushName}!* Selamat datang!  
-│ ⚙️ Saya adalah *Dy_Net Bot*  
-│ 🛠️ Dikembangkan oleh *dycoders.xyz*  
-│ 🎟️ *Limit Anda:* ${limit}  
-│ 🔰 *Status:* ${siowner ? "Owner" : isPremium ? "Premium" : "Free"}  
-└───────────────────┘  
+╭── INFO BOT ──╮  
+│ ⌬ Botname: Dy_Net  
+│ ⌬ Version: 1.1.2  
+│ ⌬ Mode: ${mode}  
+│ ⌬ Creator: dycoders.xyz  
+╰──────────────╯  
 
-┌─〔 🔍 *INFO BOT* 〕─┐  
-│ 🤖 *Botname:* Dy_Net  
-│ 🏷️ *Version:* 1.1.1  
-│ 🌍 *Mode:* ${mode}  
-│ 👨‍💻 *Creator:* dycoders.xyz  
-└───────────────────┘  
+Gunakan perintah yang tersedia untuk menikmati fitur terbaik!  
 
-🚀 *Gunakan perintah yang tersedia untuk menikmati fitur terbaik!*
+╭── OWNER MENU ──╮  
+│ ✶ .addprem [user]  
+│ ✶ .delprem [user]  
+│ ✶ .addreseller [number]  
+│ ✶ .delreseller [number]  
+│ ✶ .banuser [number]
+│ ✶ .unbanuser [number]
+│ ✶ .self  
+│ ✶ .public  
+│ ✶ .deletedns1 id  
+│ ✶ .deletedns2 id  
+│ ✶ .setdomain  
+│ ✶ .setdomain-v2  
+│ ✶ .setplta  
+│ ✶ .setpltc  
+│ ✶ .setplta-v2  
+│ ✶ .setpltc-v2  
+│ ✶ .ambilsw  
+│ ✶ .cekidgc  
+│ ✶ .addlimit  
+│ ✶ .setppbot  
+│ ✶ .getcase  
+│ ✶ .setbotname  
+│ ✶ .delsampah  
+│ ✶ .addowner [nomer]  
+│ ✶ .setwelcome [on/off]  
+│ ✶ .autoread [on/off]  
+╰──────────────╯  
 
+╭── CPANEL MENU ──╮  
+│ ⌬ .1gb  
+│ ⌬ .2gb  
+│ ⌬ .3gb  
+│ ⌬ .4gb  
+│ ⌬ .5gb  
+│ ⌬ .6gb  
+│ ⌬ .7gb  
+│ ⌬ .8gb  
+│ ⌬ .9gb  
+│ ⌬ .10gb  
+│ ⌬ .unli  
+│ ⌬ .listsrv  
+│ ⌬ .delsrv id  
+│ ⌬ .delusr id  
+│ ⌬ .listusr  
+│ ⌬ .adp  
+╰──────────────╯  
 
-┌─〔 👑 OWNER MENU 〕─┐  
-│ ✨ .addprem [user]  
-│ ✨ .delprem [user]  
-│ ✨ .addreseller [number]  
-│ ✨ .delreseller [number]  
-│ ✨ .self  
-│ ✨ .public  
-│ ✨ .deletedns1 id  
-│ ✨ .deletedns2 id  
-│ ✨ .setdomain  
-│ ✨ .setdomain-v2  
-│ ✨ .setplta  
-│ ✨ .setpltc  
-│ ✨ .setplta-v2  
-│ ✨ .setpltc-v2  
-│ ✨ .ambilsw  
-│ ✨ .cekidgc  
-│ ✨ .addlimit  
-│ ✨ .setppbot  
-│ ✨ .getcase  
-│ ✨ .setbotname  
-│ ✨ .delsampah  
-│ ✨ .addowner [nomer]  
-│ ✨ .setwelcome [on/off]  
-└──────────────┘  
+╭── PANEL MENU ──╮  
+│ ✶ .installpanel [ipvps|pwvps|panel.com]  
+│ ✶ .startwings ipvps|pwvps|token_node  
+│ ✶ .ambileggs (khusus eggs botwa)  
+╰──────────────╯  
 
-┌─〔 💾 CPANEL MENU 〕─┐  
-│ 🗂 .1gb  
-│ 🗂 .2gb  
-│ 🗂 .3gb  
-│ 🗂 .4gb  
-│ 🗂 .5gb  
-│ 🗂 .6gb  
-│ 🗂 .7gb  
-│ 🗂 .8gb  
-│ 🗂 .9gb  
-│ 🗂 .10gb  
-│ 🗂 .unli  
-│ 💽 .listsrv  
-│ 🗑 .delsrv id  
-│ 🗑 .delusr id  
-│ 👤 .listusr  
-│ 👤 .adp  
-└──────────────┘  
+╭── CLOUDFLARE MENU ──╮  
+│ ⌬ .subdomain1 > cloud-ku.my.id  
+│ ⌬ .subdomain2 > mycloudpremium.xyz  
+│ ⌬ .subdomain3 > serverku-pterodactyl.web.id  
+│ ⌬ .subdomain4 > pterodactyl-host.xyz  
+│ ⌬ .subdomain5 > node-i.my.id  
+│ ⌬ .subdomain6 > panel-i.biz.id  
+│ ⌬ .subdomain7 > premium-host.biz.id  
+│ ⌬ .editdns id|yes/no  
+│ ⌬ .addiprules note|ipvps  
+│ ⌬ .autocf iddomain|ipvps  
+╰──────────────╯  
 
-┌─〔 🖥 PANEL MENU 〕─┐  
-│ 🚀 .installpanel [ipvps|pwvps|panel.com]  
-│ 🚀 .startwings ipvps|pwvps|token_node  
-│ 🐣 .ambileggs (khusus eggs botwa)  
-└──────────────┘  
+╭── GROUP MENU ──╮  
+│ ✶ .kick [user]  
+│ ✶ .gc buka|tutup|info|member  
+│ ✶ .promote [user]  
+│ ✶ .demote [user]  
+│ ✶ .tagall  
+│ ✶ .hidetag [text]  
+│ ✶ .linkgc  
+│ ✶ .resetlinkgc  
+│ ✶ .setppgc reply img  
+╰──────────────╯  
 
-┌─〔 ☁️ CLOUDFLARE MENU 〕─┐  
-│ 🌐 .subdomain1 > cloud-ku.my.id  
-│ 🌐 .subdomain2 > mycloudpremium.xyz  
-│ 🌐 .subdomain3 > serverku-pterodactyl.web.id  
-│ 🌐 .subdomain4 > pterodactyl-host.xyz  
-│ 🌐 .subdomain5 > node-i.my.id  
-│ 🌐 .subdomain6 > panel-i.biz.id 
-│ 🌐 .subdomain7 > premium-host.biz.id
-│ 📝 .editdns id|yes/no  
-│ 📌 .addiprules note|ipvps  
-│ 🌩️ .autocf iddomain|ipvps  
-└──────────────┘  
+╭── TOOLS MENU ──╮  
+│ ⌬ .bratvid teks  
+│ ⌬ .brat teks  
+│ ⌬ .sticker image/video  
+│ ⌬ .post-paste  
+│ ⌬ .tourl img/video  
+│ ⌬ .totalfitur  
+│ ⌬ .searchsubdo  
+│ ⌬ .qc teks/reply  
+│ ⌬ .toimg reply sticker  
+│ ⌬ .hd/.remini reply img  
+│ ⌬ .ceklimit  
+│ ⌬ .islamai text  
+│ ⌬ .txt2anime prompt  
+│ ⌬ .texttoimg prompt  
+│ ⌬ .lirik judul  
+│ ⌬ .githubstalk username  
+│ ⌬ .pinterest/.pin query  
+│ ⌬ .yts query 
+│ ⌬ .spam-ngl
+│ ⌬ .tiktoks
+╰──────────────╯  
 
-┌─〔 👥 GROUP MENU 〕─┐  
-│ 🚪 .kick [user]  
-│ 🔓 .gc buka|tutup|info|member  
-│ ⬆️ .promote [user]  
-│ ⬇️ .demote [user]  
-│ 🏷️ .tagall  
-│ 👻 .hidetag [text]  
-│ 🔗 .linkgc  
-│ ♻️ .resetlinkgc  
-│ 🖼️ .setppgc reply img
-└──────────────┘  
+╭── DOWNLOAD MENU ──╮  
+│ ✶ .tiktok  
+│ ✶ .mediafire url  
+│ ✶ .git urlrepo  
+│ ✶ .yt url  
+│ ✶ .spotifydl url track  
+│ ✶ .ig/.instagram url  
+│ ✶ .npmd name  
+╰──────────────╯  
 
-┌─〔 🔧 TOOLS MENU 〕─┐  
-│ 📝 .bratvid teks  
-│ 📝 .brat teks  
-│ 📝 .sticker image/video  
-│ 📄 .post-paste  
-│ 🔗 .tourl img/video  
-│ 📚 .totalfitur  
-│ 🔍 .searchsubdo  
-│ 😎 .qc teks/reply  
-│ 📼 .toimg reply sticker  
-│ 💡 .hd/.remini reply img  
-│ 💳 .ceklimit  
-│ 🤖 .islamai text
-│ 🖌️ .txt2anime prompt
-│ 🖌️ .texttoimg prompt
-│ ️🔍 .lirik judul
-│ 🔎 .githubstalk username
-│ 💡 .pinterest/.pin query
-└──────────────┘  
+╭── PLAY MENU ──╮  
+│ ⌬ .play judul  
+│ ⌬ .splay judul  
+╰──────────────╯  
 
-┌─〔 💾 DOWNLOAD MENU 〕─┐  
-│ 🎥 .tiktok  
-│ 📁 .mediafire url  
-│ 📁 .git urlrepo  
-│ ▶️ .yt url  
-│ 🎶 .spotifydl url track
-│ 🎥 .ig/.instagram url  
-│ 🗃 .npmd name
-└──────────────┘  
-
-┌─〔 🎧 PLAY MENU 〕─┐  
-│ 🎥 .play judul
-│ 🎶 .splay judul
-└──────────────┘  
-
-
-
-📌 *Gunakan perintah dengan bijak!*  
-💬 _Hubungi owner jika butuh bantuan._  
-🚀 *Don't Forget Support dycoders.xyz*
-
+Gunakan perintah dengan bijak!  
+Hubungi owner jika butuh bantuan.  
+Support dycoders.xyz  
 `
 
 
@@ -863,7 +931,7 @@ const menunya = `
 📌 *INFORMASI BOT:*  
 ╭─────────────────────  
 │ 📛 *Bot Name:* dy_net  
-│ 🔢 *Version:* 1.1.1  
+│ 🔢 *Version:* 1.1.2  
 │ 🌐 *Mode:* ${mode}  
 │ 🧑‍💻 *Creator:* dycoders.xyz  
 ╰─────────────────────  
@@ -959,10 +1027,9 @@ if (!siowner) return forbiden(mess.owner)
     let t = text.split(',');  
     if (t.length < 2) return Reply(`Contoh: ${prefix + command} username,nomor`);  
 
-    let username = t[0].trim();  
-    let inputNumber = t[1].replace(/[^0-9]/g, '');  
-    if (!inputNumber.startsWith('62')) inputNumber = '62' + inputNumber;  
-    let u = inputNumber + '@s.whatsapp.net';  
+    let username = t[0].trim();
+let inputNumber = t[1].replace(/[^0-9]/g, ''); 
+let u = inputNumber + '@s.whatsapp.net';
 
     let email = username + "@dycoders.xyz";  
     let password = crypto.randomBytes(5).toString('hex');  
@@ -1053,10 +1120,10 @@ if (!siowner) return forbiden(mess.owner)
     let t = text.split(',');  
     if (t.length < 2) return Reply(`Contoh: ${prefix + command} username,nomor`);  
 
-    let username = t[0].trim();  
-    let inputNumber = t[1].replace(/[^0-9]/g, '');  
-    if (!inputNumber.startsWith('62')) inputNumber = '62' + inputNumber;  
-    let u = inputNumber + '@s.whatsapp.net';  
+    let username = t[0].trim();
+let inputNumber = t[1].replace(/[^0-9]/g, ''); 
+let u = inputNumber + '@s.whatsapp.net';
+
 
     let email = username + "@dycoders.xyz";  
     let password = crypto.randomBytes(5).toString('hex');  
@@ -1105,7 +1172,7 @@ if (!siowner) return forbiden(mess.owner)
                                         {  
                                             header: '🌍 Panel Login',  
                                             title: '',  
-                                            description: `${domain}`,  
+                                            description: `${cpanelv2}`,  
                                             id: '.panel',  
                                         },  
                                         {  
@@ -1142,39 +1209,54 @@ if (!siowner) return forbiden(mess.owner)
 
 
 case 'addreseller': {
-
- if (!siowner) return forbiden(mess.owner)
-
-    if (!text) return Reply("Masukkan nomor! Contoh: .addreseller 628xxx");
-
-    let number = text.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
-    let resellers = loadReseller();
-
-    if (resellers.includes(number)) return Reply("User sudah menjadi reseller!");
-
-    resellers.push(number);
-    saveReseller(resellers);
-
-  Reply(`✅ Berhasil menambahkan ${number} sebagai reseller!`);
-    break;
+if (!siowner) return forbiden(mess.owner);
+if (!args[0]) return Reply(penggunaan("628xxx"))
+var sireseller = text.split("|")[0].replace(/[^0-9]/g, '')
+let target = sireseller + '@s.whatsapp.net'
+ress.push(sireseller)
+fs.writeFileSync('./start/lib/database/reseller.json', JSON.stringify(sireseller))
+Reply(`Sukses menambah reseller @${target.split('@')[0]}`)
+try {
+var ppnya = await dycoders.profilePictureUrl(target, "image")
+} catch {
+var ppnya = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png?q=60"
 }
+dycoders.sendMessage(target, {
+image: {
+url: ppnya
+},
+caption: "Selamat, kamu sudah bisa mengakses fitur"
+}, {
+quoted: m
+})
+}
+break
 
 case 'delreseller': {
-   if (!siowner) return forbiden(mess.owner)
-
-    if (!text) return Reply("Masukkan nomor! Contoh: .delreseller 628xxx");
-
-    let number = text.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
-    let resellers = loadReseller();
-
-    if (!resellers.includes(number)) return Reply("User tidak ada dalam daftar reseller!");
-
-    resellers = resellers.filter(user => user !== number);
-    saveReseller(resellers);
-
-    Reply(`✅ Berhasil menghapus ${number} dari daftar reseller!`);
-    break;
+if (!siowner) return forbiden(mess.owner);
+if (!args[0]) return Reply(penggunaan("628xxx"))
+var delresl = text.split("|")[0].replace(/[^0-9]/g, '')
+let target = delresl + '@s.whatsapp.net'
+unp = own.indexOf(delresl)
+ress.splice(unp, 1)
+fs.writeFileSync('./start/lib/database/reseller.json', JSON.stringify(sireseller))
+Reply(`Sukses menghapus reseller @${target.split('@')[0]}`)
+try {
+var ppnya = await dycoders.profilePictureUrl(target, "image")
+} catch {
+var ppnya = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png?q=60"
 }
+dycoders.sendMessage(target, {
+image: {
+url: ppnya
+},
+caption: "Yahh kamu udah gk bisa akses cpanel lagi"
+}, {
+quoted: m
+})
+}
+break
+
 case "self": {
     const siowner = [dycoders.decodeJid(dycoders.user.id), ...global.rowner.map(([number]) => number)]
         .map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
@@ -1263,6 +1345,7 @@ caption: respon
 await dycoders.relayMessage(m.chat, invite.message, { messageId: invite.key.id })
   }
 break;
+
 case 'menu': {
     dycoders.sendMessage(m.chat, { react: { text: '⏱️', key: m.key }});
 
@@ -1303,7 +1386,7 @@ case 'menu': {
                                         header: 'All Menu',
                                         title: '',
                                         description: 'Display to show all menu',
-                                        id: '.allmenu',
+                                        id: '.help',
                                     }
                                 ],
                             },
@@ -1372,35 +1455,6 @@ break;
 
 
 
-case 'allmenu': {
-await dycoders.sendMessage(m.chat,
-    {
-        product: {
-            productImage: { url: thumbnail }, 
-            productImageCount: 1,
-            title: "INI MENU NYA",
-            description: "MAAF JIKA MASIH DIKIT SC MASIH DALAM PERKEMBANGAN", 
-            priceAmount1000: 20000 * 1000,
-            currencyCode: "IDR", 
-            retailerId: "100000", 
-            url: "https://dycoders.xyz",    
-        },
-        businessOwnerJid: m.sender,
-        caption: allmenu, 
-        title: wmbot,
-        footer: "dycoders.xyz", 
-        media: true,
-        viewOnce: true, 
-        shop: "WA",
-        id: "171123",
-    },
-  {
-    quoted : fsaluran
-  }
-)
-}
-break
-
 case 'cpanelv2': {
 await dycoders.sendMessage(m.chat,
     {
@@ -1433,7 +1487,7 @@ case 'cpanel': {
 await dycoders.sendMessage(m.chat,
     {
         product: {
-            productImage: { url: 'https://files.catbox.moe/nmptrt.jpg' }, // Masukkan link gambar di tanda kutip
+            productImage: { url: 'https://files.catbox.moe/nmptrt.jpg' }, 
             productImageCount: 1,
             title: "Cpanel Pterodactyl", // input title in thumbnail
             description: "Reseller only", // G usah kalo gw
@@ -1489,7 +1543,7 @@ break
 
 
 case "1gb": case "2gb": case "3gb": case "4gb": case "5gb": case "6gb": case "7gb": case "8gb": case "9gb": case "10gb": case "unlimited": case "unli": {
-  if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
+  if (!isreseller) return forbiden(mess.res)
 
 
     if (!text) return Reply("username,nomor");
@@ -1497,12 +1551,10 @@ case "1gb": case "2gb": case "3gb": case "4gb": case "5gb": case "6gb": case "7g
     let t = text.split(',');
     if (t.length < 2) return Reply(`Contoh: ${prefix + command} username,nomor`);
 
-    let username = t[0].trim();
-    let inputNumber = t[1].replace(/[^0-9]/g, '');
-    if (!inputNumber.startsWith('62')) inputNumber = '62' + inputNumber;
-    let u = inputNumber + '@s.whatsapp.net';
+let username = t[0].trim();
+let inputNumber = t[1].replace(/[^0-9]/g, ''); 
+let u = inputNumber + '@s.whatsapp.net';
 
-   
 
     let ram, disknya, cpu;
     if (command == "1gb") {
@@ -1672,10 +1724,148 @@ let server = serverData.attributes;
     }
     break;
 }
+case "addsrv": {
+    if (!isreseller) return forbiden(mess.res);
+
+    if (!text) return Reply("Format: .addsrv 1gb,iduser");
+
+    let t = text.split(',');
+    if (t.length < 2) return Reply(`Contoh: .addsrv 1gb,iduser`);
+
+    let package = t[0].trim().toLowerCase();
+    let userID = t[1].trim();
+
+    let specs = {
+        "1gb": { ram: "1000", disk: "1000", cpu: "40" },
+        "2gb": { ram: "2000", disk: "1000", cpu: "60" },
+        "3gb": { ram: "3000", disk: "2000", cpu: "80" },
+        "4gb": { ram: "4000", disk: "2000", cpu: "100" },
+        "5gb": { ram: "5000", disk: "3000", cpu: "120" },
+        "6gb": { ram: "6000", disk: "3000", cpu: "140" },
+        "7gb": { ram: "7000", disk: "4000", cpu: "160" },
+        "8gb": { ram: "8000", disk: "4000", cpu: "180" },
+        "9gb": { ram: "9000", disk: "5000", cpu: "200" },
+        "10gb": { ram: "10000", disk: "5000", cpu: "220" },
+        "unli": { ram: "0", disk: "0", cpu: "0" } 
+    };
+
+    if (!specs[package]) return Reply("Paket tidak valid!");
+
+    let { ram, disk, cpu } = specs[package];
+
+    let deskripsi = `Server ${package.toUpperCase()} - Aktif 1 Bulan`;
+
+    try {
+        let serverRes = await fetch(`${domain}/api/application/servers`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apikey}`
+            },
+            body: JSON.stringify({
+                name: `Server ${package}`,
+                description: deskripsi,
+                user: parseInt(userID),
+                egg: parseInt(eggnya),
+                docker_image: "ghcr.io/parkervcp/yolks:nodejs_18",
+                startup: "npm start",
+                environment: {
+                    "INST": "npm",
+                    "USER_UPLOAD": "0",
+                    "AUTO_UPDATE": "0",
+                    "CMD_RUN": "npm start"
+                },
+                limits: { memory: ram, swap: 0, disk, io: 500, cpu },
+                feature_limits: { databases: 0, backups: 0, allocations: 0 },
+                deploy: { locations: [parseInt(locnya)], dedicated_ip: false, port_range: [] }
+            })
+        });
+
+        let serverData = await serverRes.json();
+        if (serverData.errors) return Reply(JSON.stringify(serverData.errors[0], null, 2));
+
+        Reply(`✅ *Server berhasil dibuat!*\n\n📩 Paket: ${package.toUpperCase()} telah ditambahkan ke user ID: *${userID}*`);
+    } catch (error) {
+        console.error(error);
+        Reply("❌ Terjadi kesalahan saat membuat server.");
+    }
+    break;
+}
+
+case "addsrv-v2": {
+    if (!isreseller) return forbiden(mess.res);
+
+    if (!text) return Reply("Format: .addsrv 1gb,iduser");
+
+    let t = text.split(',');
+    if (t.length < 2) return Reply(`Contoh: .addsrv 1gb,iduser`);
+
+    let package = t[0].trim().toLowerCase();
+    let userID = t[1].trim();
+
+    let specs = {
+        "1gb": { ram: "1000", disk: "1000", cpu: "40" },
+        "2gb": { ram: "2000", disk: "1000", cpu: "60" },
+        "3gb": { ram: "3000", disk: "2000", cpu: "80" },
+        "4gb": { ram: "4000", disk: "2000", cpu: "100" },
+        "5gb": { ram: "5000", disk: "3000", cpu: "120" },
+        "6gb": { ram: "6000", disk: "3000", cpu: "140" },
+        "7gb": { ram: "7000", disk: "4000", cpu: "160" },
+        "8gb": { ram: "8000", disk: "4000", cpu: "180" },
+        "9gb": { ram: "9000", disk: "5000", cpu: "200" },
+        "10gb": { ram: "10000", disk: "5000", cpu: "220" },
+        "unli": { ram: "0", disk: "0", cpu: "0" } 
+    };
+
+    if (!specs[package]) return Reply("Paket tidak valid!");
+
+    let { ram, disk, cpu } = specs[package];
+
+    let deskripsi = `Server ${package.toUpperCase()} - Aktif 1 Bulan`;
+
+    try {
+        let serverRes = await fetch(`${cpanelv2}/api/application/servers`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${siptakey2}`
+            },
+            body: JSON.stringify({
+                name: `Server ${package}`,
+                description: deskripsi,
+                user: parseInt(userID),
+                egg: parseInt(eggnya),
+                docker_image: "ghcr.io/parkervcp/yolks:nodejs_18",
+                startup: "npm start",
+                environment: {
+                    "INST": "npm",
+                    "USER_UPLOAD": "0",
+                    "AUTO_UPDATE": "0",
+                    "CMD_RUN": "npm start"
+                },
+                limits: { memory: ram, swap: 0, disk, io: 500, cpu },
+                feature_limits: { databases: 0, backups: 0, allocations: 0 },
+                deploy: { locations: [parseInt(locnya)], dedicated_ip: false, port_range: [] }
+            })
+        });
+
+        let serverData = await serverRes.json();
+        if (serverData.errors) return Reply(JSON.stringify(serverData.errors[0], null, 2));
+
+        Reply(`✅ *Server berhasil dibuat!*\n\n📩 Paket: ${package.toUpperCase()} telah ditambahkan ke user ID: *${userID}*`);
+    } catch (error) {
+        console.error(error);
+        Reply("❌ Terjadi kesalahan saat membuat server.");
+    }
+    break;
+}
+
 
 
 case "1gb-v2": case "2gb-v2": case "3gb-v2": case "4gb-v2": case "5gb-v2": case "6gb-v2": case "7gb-v2": case "8gb-v2": case "9gb-v2": case "10gb-v2": case "unlimited-v2": case "unli-v2": {
-  if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
+  if (!isreseller) return forbiden(mess.res)
 
 
     if (!text) return Reply("username,nomor");
@@ -1684,9 +1874,8 @@ case "1gb-v2": case "2gb-v2": case "3gb-v2": case "4gb-v2": case "5gb-v2": case 
     if (t.length < 2) return Reply(`Contoh: ${prefix + command} username,nomor`);
 
     let username = t[0].trim();
-    let inputNumber = t[1].replace(/[^0-9]/g, '');
-    if (!inputNumber.startsWith('62')) inputNumber = '62' + inputNumber;
-    let u = inputNumber + '@s.whatsapp.net';
+let inputNumber = t[1].replace(/[^0-9]/g, ''); 
+let u = inputNumber + '@s.whatsapp.net';
 
    
 
@@ -1861,7 +2050,7 @@ let server = serverData.attributes;
 
 
 case 'tagsw': case 'upsw': {
-    
+if (!siowner) return forbiden(mess.owner)
     const stat = {key: {fromMe: false,participant: `0@s.whatsapp.net`, ...(m.chat ? { remoteJid: "status@broadcast" } : {})},message: { "imageMessage": {"url": "https://mmg.whatsapp.net/d/f/At0x7ZdIvuicfjlf9oWS6A3AR9XPh0P-hZIVPLsI70nM.enc","mimetype": "image/jpeg","caption": "","fileSha256": "+Ia+Dwib70Y1CWRMAP9QLJKjIJt54fKycOfB2OEZbTU=","fileLength": "28777","height": 1080,"width": 1079,"mediaKey": "vXmRR7ZUeDWjXy5iQk17TrowBzuwRya0errAFnXxbGc=","fileEncSha256": "sR9D2RS5JSifw49HeBADguI23fWDz1aZu4faWG/CyRY=","directPath": "/v/t62.7118-24/21427642_840952686474581_572788076332761430_n.enc?oh=3f57c1ba2fcab95f2c0bb475d72720ba&oe=602F3D69","mediaKeyTimestamp": "1610993486","jpegThumbnail": fs.readFileSync('./start/lib/dy.jpg'),"scansSidecar": "1W0XhfaAcDwc7xh1R8lca6Qg/1bB4naFCSngM2LKO2NoP5RI7K+zLw=="}}}
     if (!text) return Reply(`Masukkan teks untuk caption status dan. reply \n- video\n- gambar\n- audio\n- text`);
     let [caption, jid] = text.split('|');
@@ -1939,63 +2128,6 @@ groupJid: jid.trim(),
  }, ], },},{quoted: fswtag });
 }
 break;
-case "postmusic": {
-    if (!m.quoted) {
-        return Reply(m.chat, `Reply gambar dengan caption *${prefix + command}*`, m);
-    }
-
-    let mime = m.quoted.mimetype || "";
-    if (!/image/.test(mime)) {
-        return Reply(m.chat, `Hanya bisa mengirim gambar, bukan ${mime}`, m);
-    }
-
-    try {
-        await dycoders.sendMessage(m.chat, { react: { text: "🕐", key: m.key } });
-
-        let imageBuffer = await m.quoted.download();
-        let caption = "Enjoy the music 🎶"; // Bisa diubah sesuai kebutuhan
-
-        await dycoders.sendMessage(
-            "status@broadcast",
-            {
-                image: imageBuffer,
-                caption: caption,
-                annotations: [
-                    {
-                        embeddedContent: {
-                            embeddedMusic: {
-                                musicContentMediaId: "1055201496437073",
-                                songId: "1118085175512946",
-                                author: "The.Wav",
-                                title: "I Love You",
-                                artworkDirectPath:
-                                    "/v/t62.76458-24/27395598_1002020668087405_6722814053980892307_n.enc?ccb=11-4&oh=01_Q5AaIV7SSvDPnWwdNqiI7QkIkie4wiqOi6Qk084isIsr-Wat&oe=67F81BD7&_nc_sid=5e03e0",
-                                artworkSha256: "iUgkXuVJp9sfxukOJsZS7NW1YOH46pZHJi77VlHyZMc=",
-                                artworkEncSha256: "XuaqRZHVCQPuiFgDYYtBzm5goOe6j9QndoTigxMywp8=",
-                                artistAttribution: "https://facebook.com/gregorystutzer",
-                                countryBlocklist: "",
-                                isExplicit: false,
-                                artworkMediaKey: "ezVPzIKc/ffgZKefRVRLLByPBRnkHGqPbR/2K1Renpc=",
-                            },
-                        },
-                        embeddedAction: true,
-                    },
-                ],
-            },
-            {
-                statusJidList: [m.sender],
-            }
-        );
-
-        await dycoders.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
-    } catch (error) {
-        console.error("❌ Error:", error);
-        await dycoders.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
-        return Reply(m.chat, `🚨 Terjadi kesalahan: ${error.message}`, m);
-    }
-    break;
-}
-
 
 case 'cekidgc': {
 if (!siowner) return forbiden(mess.owner)
@@ -2146,7 +2278,7 @@ async function updateConfigValue(key, value, m) {
         if (regex.test(settings)) {
             settings = settings.replace(regex, `$1${value};`);
             fs.writeFileSync(settingsPath, settings, 'utf8');
-            Reply(`✅ *Welcome berhasil diubah ke ${value.toUpperCase()}!*`);
+            Reply(`✅ *config berhasil diubah ke ${value.toUpperCase()}!*`);
         } else {
             Reply(`❌ *Setting ${key} tidak ditemukan di config.js!*`);
         }
@@ -2166,6 +2298,19 @@ case 'setwelcome': {
     await updateConfigValue('welcome', value, m);
     break;
 }
+
+case 'autoread': { 
+    if (!siowner) return forbiden(mess.owner);
+    if (!text) return Reply('❌ Masukkan `on` atau `off`!\nContoh: `.autoread on` atau `.autoread off`');
+
+    let value = text.toLowerCase() === "on" ? "true" : text.toLowerCase() === "off" ? "false" : null;
+    if (value === null) return Reply('❌ Pilih `on` atau `off` saja!');
+
+    await updateConfigValue('autoread', value, m);
+    break;
+}
+
+
 
 case "uninstallpanel": {
     if (!text || !text.split("|")) return Reply("ipvps|pwvps")
@@ -2302,13 +2447,193 @@ Reply('Katasandi atau IP tidak valid');
 }).connect(connSettings);
 }
 break
+//V2
+case "suspend-server-v2": {
+  if (!siowner) return forbiden(mess.owner)
+    if (!text) return Reply("Masukkan ID server yang ingin disuspend.\nContoh: `.suspend-server 123`");
+
+    let serverId = text.trim();
+
+    try {
+        let suspendRes = await fetch(`${siptakey2}/api/application/servers/${serverId}/suspend`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${siptakey2}`
+            }
+        });
+
+        if (!suspendRes.ok) {
+            let errorData = await suspendRes.json();
+            return Reply(`❌ Gagal suspend server: ${JSON.stringify(errorData, null, 2)}`);
+        }
+
+        Reply(`✅ Server dengan ID *${serverId}* berhasil disuspend.`);
+    } catch (error) {
+        console.error(error);
+        Reply("❌ Terjadi kesalahan saat memproses permintaan.");
+    }
+    break;
+}
+
+case "unsuspend-server-v2": {
+   if (!siowner) return forbiden(mess.owner)
+    if (!text) return Reply("Masukkan ID server yang ingin di-unsuspend.\nContoh: `.unsuspend-server 123`");
+
+    let serverId = text.trim();
+
+    try {
+        let unsuspendRes = await fetch(`${cpanelv2}/api/application/servers/${serverId}/unsuspend`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${siptakey2}`
+            }
+        });
+
+        if (!unsuspendRes.ok) {
+            let errorData = await unsuspendRes.json();
+            return Reply(`❌ Gagal unsuspend server: ${JSON.stringify(errorData, null, 2)}`);
+        }
+
+        Reply(`✅ Server dengan ID *${serverId}* berhasil di-unsuspend.`);
+    } catch (error) {
+        console.error(error);
+        Reply("❌ Terjadi kesalahan saat memproses permintaan.");
+    }
+    break;
+}
+
+case "reinstall-server-v2": {
+    if (!siowner) return forbiden(mess.owner)
+    if (!text) return Reply("Masukkan ID server yang ingin direinstall.\nContoh: `.reinstall-server 123`");
+
+    let serverId = text.trim();
+
+    try {
+        let reinstallRes = await fetch(`${cpanelv2}/api/application/servers/${serverId}/reinstall`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${siptakey2}`
+            }
+        });
+
+        if (!reinstallRes.ok) {
+            let errorData = await reinstallRes.json();
+            return Reply(`❌ Gagal reinstall server: ${JSON.stringify(errorData, null, 2)}`);
+        }
+
+        Reply(`✅ Server dengan ID *${serverId}* berhasil direinstall.`);
+    } catch (error) {
+        console.error(error);
+        Reply("❌ Terjadi kesalahan saat memproses permintaan.");
+    }
+    break;
+}
+
+
+
+
+
+
+
+//V1
+    
+case "suspend-server": {
+    if (!siowner) return forbiden(mess.owner)
+    if (!text) return Reply("Masukkan ID server yang ingin disuspend.\nContoh: `.suspend-server 123`");
+
+    let serverId = text.trim();
+
+    try {
+        let suspendRes = await fetch(`${domain}/api/application/servers/${serverId}/suspend`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apikey}`
+            }
+        });
+
+        if (!suspendRes.ok) {
+            let errorData = await suspendRes.json();
+            return Reply(`❌ Gagal suspend server: ${JSON.stringify(errorData, null, 2)}`);
+        }
+
+        Reply(`✅ Server dengan ID *${serverId}* berhasil disuspend.`);
+    } catch (error) {
+        console.error(error);
+        Reply("❌ Terjadi kesalahan saat memproses permintaan.");
+    }
+    break;
+}
+
+case "unsuspend-server": {
+    if (!siowner) return forbiden(mess.owner)
+    if (!text) return Reply("Masukkan ID server yang ingin di-unsuspend.\nContoh: `.unsuspend-server 123`");
+
+    let serverId = text.trim();
+
+    try {
+        let unsuspendRes = await fetch(`${domain}/api/application/servers/${serverId}/unsuspend`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apikey}`
+            }
+        });
+
+        if (!unsuspendRes.ok) {
+            let errorData = await unsuspendRes.json();
+            return Reply(`❌ Gagal unsuspend server: ${JSON.stringify(errorData, null, 2)}`);
+        }
+
+        Reply(`✅ Server dengan ID *${serverId}* berhasil di-unsuspend.`);
+    } catch (error) {
+        console.error(error);
+        Reply("❌ Terjadi kesalahan saat memproses permintaan.");
+    }
+    break;
+}
+
+case "reinstall-server": {
+    if (!siowner) return forbiden(mess.owner)
+    if (!text) return Reply("Masukkan ID server yang ingin direinstall.\nContoh: `.reinstall-server 123`");
+
+    let serverId = text.trim();
+
+    try {
+        let reinstallRes = await fetch(`${domain}/api/application/servers/${serverId}/reinstall`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apikey}`
+            }
+        });
+
+        if (!reinstallRes.ok) {
+            let errorData = await reinstallRes.json();
+            return Reply(`❌ Gagal reinstall server: ${JSON.stringify(errorData, null, 2)}`);
+        }
+
+        Reply(`✅ Server dengan ID *${serverId}* berhasil direinstall.`);
+    } catch (error) {
+        console.error(error);
+        Reply("❌ Terjadi kesalahan saat memproses permintaan.");
+    }
+    break;
+}
 
     
     
-    
-    
 case 'listsrv': { 
-if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
+if (!isreseller) return forbiden(mess.res)
     let page = args[0] ? args[0] : '1'; 
 
     let f = await fetch(domain + "/api/application/servers?page=" + page, { 
@@ -2831,7 +3156,7 @@ break;
 
 
 case 'listsrv-v2': { 
-if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
+if (!isreseller) return forbiden(mess.res)
     let page = args[0] ? args[0] : '1'; 
 
     let f = await fetch(cpanelv2 + "/api/application/servers?page=" + page, { 
@@ -2924,7 +3249,7 @@ if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
 
 
 case 'listusr': { 
-if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
+if (!isreseller) return forbiden(mess.res)
 
     let page = args[0] ? args[0] : '1'; 
     let f = await fetch(domain + "/api/application/users?page=" + page + "&per_page=8", {  
@@ -2992,7 +3317,7 @@ if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
 
 
 case 'listusr-v2': { 
-if (!isReseller(sender)) return forbiden("Fitur ini hanya untuk reseller!");
+if (!isreseller) return forbiden(mess.res)
 
     let page = args[0] ? args[0] : '1'; 
     let f = await fetch(cpanelv2 + "/api/application/users?page=" + page + "&per_page=40", {  
@@ -3084,8 +3409,9 @@ case 'islamai': {
 
 
 case 'get': {
+  if (!isPremium) return forbiden(mess.prem)
   const axios = require('axios');
-if (!isPremium(m.sender)) return;
+
 if (!text) return Reply(`awali *URL* dengan http:// atau https://`)
 try {
 const gt = await axios.get(text, {
@@ -5231,7 +5557,6 @@ case 'yt': {
 }
 
     break;
-
 case 'play': {
   if (limitnya < 1) return forbiden(mess.limit);
   await dycoders.sendMessage(m.chat, { react: { text: '🕖', key: m.key } });
@@ -5436,6 +5761,72 @@ case 'play': {
   } finally {
       uselimit(sender); 
   }
+}
+break;
+case "yts": {
+    if (!text) return Reply(penggunaan('Masukkan judul video yang ingin dicari.'));
+    await dycoders.sendMessage(m.chat, { react: { text: '🔎', key: m.key } });
+
+    let ytsSearch = await yts(text);
+    const results = ytsSearch.all.slice(0, 5);
+
+    if (results.length === 0) return Reply("❌ Tidak ditemukan hasil pencarian.");
+
+    let rows = [];
+    for (let video of results) {
+        let { title, url, timestamp, ago, views, author } = video;
+        
+        rows.push(
+            {
+                header: `🎬 ${title}`,
+                title: "🔗 Link Video",
+                description: "Salin tautan video",
+                id: `${url}`
+            },
+            {
+                header: `🎬 ${title}`,
+                title: "🎵 Audio",
+                description: "Unduh sebagai audio",
+                id: `.yt ${url} --audio`
+            },
+            {
+                header: `🎬 ${title}`,
+                title: "🎥 Video",
+                description: "Unduh sebagai video",
+                id: `.yt ${url} --video`
+            }
+        );
+    }
+
+    let buttons = [
+        {
+            buttonId: 'action',
+            buttonText: { displayText: 'Pilih Video' },
+            type: 4,
+            nativeFlowInfo: {
+                name: 'single_select',
+                paramsJson: JSON.stringify({
+                    title: `🔎 Hasil pencarian untuk: "${text}"`,
+                    sections: [
+                        {
+                            title: 'Pilih salah satu opsi di bawah:',
+                            highlight_label: 'Klik untuk memilih',
+                            rows: rows
+                        }
+                    ]
+                })
+            }
+        }
+    ];
+
+    await dycoders.sendMessage(m.chat, {
+        text: `🔹 *Hasil Pencarian YouTube (Top 5)*`,
+        footer: `© ${global.siowner} - 2025`,
+        buttons: buttons,
+        headerType: 1,
+        viewOnce: true
+    }, { quoted: m });
+
 }
 break;
 
@@ -5688,6 +6079,28 @@ Reply(`Berhasil Mengubah Nama Bot Tuan✅`)
 break
 
 
+
+case 'tiktoks': case 'tiktoksearch': case 'ttsearch': {
+    if (limitnya < 1) return forbiden(mess.limit);
+    if (!text) return Reply(`*Example :* .${command} jedag jedug`);
+
+    dycoders.sendMessage(m.chat, { react: { text: '🕐', key: m.key } });
+
+    try {
+        let kemii = await tiktoks(`${text}`);
+        dycoders.sendMessage(m.chat, {
+            video: { url: kemii.no_watermark },
+            caption: '```Result from:``` ' + '`' + text + '`'
+        }, { quoted: m });
+
+        uselimit(sender);
+    } catch (error) {
+        console.error(error);
+        m.reply('Terjadi kesalahan saat mengambil data dari TikTok.');
+    }
+    break;
+}
+
 case 'q': {
 if (!siowner) return; 
 let jsonData = JSON.stringify({ [m.quoted.mtype]: m.quoted }, null, 2)
@@ -5863,6 +6276,220 @@ case "npmd": {
   }
   break;
 }
+case 'help': {
+    let menu = `${allmenu}`;
+
+    const buttons = [
+        {
+            buttonId: `.owner`,
+            buttonText: { displayText: 'owner' }
+        },
+        {
+            buttonId: `.tqto`,
+            buttonText: { displayText: "tqto" }
+        }
+    ];
+
+    const buttonMessage = {
+        document: fs.readFileSync("./config.js"),
+        fileName: "dycoders.js",
+        fileLength: 999999999,
+        pageCount: 99999999999999,
+        mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        caption: menu,
+        footer: `\n© ${global.siowner} - 2025`,
+        buttons: buttons,
+        headerType: 1,
+        contextInfo: {
+            externalAdReply: {
+                containsAutoReply: true,
+                mediaType: 1,
+                renderLargerThumbnail: true,
+                showAdAttribution: true,
+                thumbnailUrl: thumbnail,
+                title: `© ${global.siowner} - 2025`,
+                body: "dy_net"
+            },
+        },
+        viewOnce: true,
+        headerType: 6
+    };
+
+    return dycoders.sendMessage(m.chat, buttonMessage, {
+        quoted: fswtag
+    });
+}
+break;
+
+case "update": {
+if (!siowner) return; 
+if (!args[0]) return m.reply("⚠️ Masukin link raw file yang mau diupdate!");
+const fs = require("fs");
+const fetch = require("node-fetch");
+let updatedFiles = [];
+const updateFile = async (url) => {
+try {
+let splitUrl = url.split("/main/"); 
+if (splitUrl.length < 2) throw new Error("Format URL salah!");
+let path = splitUrl[1];
+if (!path) throw new Error("Path file tidak ditemukan!");
+let res = await fetch(url);if (!res.ok) throw new Error("Gagal fetch file!");
+let fileData = await res.text();
+fs.writeFileSync(`./${path}`, fileData);
+updatedFiles.push(`🗃️ Updated: ./${path}`);
+} catch (err) {
+updatedFiles.push(`❌ Error: ${err.message}`);
+}
+};
+
+(async () => {
+await Promise.all(args.map(updateFile));
+m.reply(`🔄 **UPDATE SELESAI!**\n\n${updatedFiles.join("\n")}\n\n⏳ Restarting bot...`);
+
+setTimeout(() => {
+process.exit(1);
+}, 3000);
+})();
+}
+break
+
+
+case 'banuser': {
+    if (!siowner) return forbiden(mess.owner);
+    if (!args[0]) return Reply(penggunaan("628xxx|@tag"));
+
+    let who;
+    if (m.mentionedJid[0]) {
+        who = m.mentionedJid[0];
+    } else if (m.quoted) {
+        who = m.quoted.sender;
+    } else {
+        let premm = text.replace(/[^0-9]/g, '');
+        who = premm + '@s.whatsapp.net';
+    }
+
+    const isBen = user_ban.includes(who);
+    if (isBen) return Reply(`${who} sudah di banned!`);
+
+    user_ban.push(who);
+    fs.writeFileSync('./start/lib/database/banned.json', JSON.stringify(user_ban, null, 2));
+    Reply(`Sukses menambah ban untuk @${who.split('@')[0]}`);
+}
+break;
+
+case 'unbanuser': {
+    if (!siowner) return forbiden(mess.owner);
+    if (!args[0]) return Reply(penggunaan("628xxx|@tag"));
+
+    let whe;
+    if (m.mentionedJid[0]) {
+        whe = m.mentionedJid[0];
+    } else if (m.quoted) {
+        whe = m.quoted.sender;
+    } else {
+        let premmm = text.replace(/[^0-9]/g, '');
+        whe = premmm + '@s.whatsapp.net';
+    }
+
+    const index = user_ban.indexOf(whe);
+    if (index > -1) {
+        user_ban.splice(index, 1);
+        fs.writeFileSync('./start/lib/database/banned.json', JSON.stringify(user_ban, null, 2));
+        Reply(`Sukses menghapus ban untuk @${whe.split('@')[0]}`);
+    } else {
+        return Reply(`${whe} tidak ditemukan dalam daftar banned.`);
+    }
+}
+break;
+
+
+case 'boom-ngl': 
+case 'spam-ngl': {
+    if (!siowner) return forbiden(mess.owner);
+    console.log("Input awal:", text);
+
+   
+    if (!text || typeof text !== "string") {
+        return m.reply("Input tidak valid. Harap masukkan teks dengan format: `username|message|jumlah`.");
+    }
+
+    if (!text.includes("|")) {
+        return m.reply("Format input salah. Gunakan format: `username|message|jumlah`.");
+    }
+
+    let [username, message, jumlah = 500] = text.split("|");
+
+
+    if (!username || !message) {
+        return m.reply("*Username* dan *Message* diperlukan. Gunakan format: `username|message|jumlah`.");
+    }
+
+    jumlah = parseInt(jumlah);
+    if (isNaN(jumlah) || jumlah <= 0) {
+        return m.reply("Jumlah tidak valid. Masukkan angka positif.");
+    }
+
+    let counter = 0;
+
+    const sendMessage = async (username, message) => {
+        while (counter < jumlah) {
+            try {
+                const date = new Date();
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const formattedDate = `${hours}:${minutes}`;
+
+                const deviceId = crypto.randomBytes(21).toString("hex");
+                const url = "https://ngl.link/api/submit";
+
+                const headers = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
+                    "Accept": "*/*",
+                    "Accept-Language": "en-US,en;q=0.5",
+                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Sec-Fetch-Dest": "empty",
+                    "Sec-Fetch-Mode": "cors",
+                    "Sec-Fetch-Site": "same-origin",
+                    "Referer": `https://ngl.link/${username}`,
+                    "Origin": "https://ngl.link"
+                };
+
+                const body = `username=${username}&question=${message}&deviceId=${deviceId}&gameSlug=&referrer=`;
+
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers,
+                    body,
+                    mode: "cors",
+                    credentials: "include"
+                });
+
+                if (response.status !== 200) {
+                    console.log(`[${formattedDate}] [Err] Ratelimited`);
+                    await new Promise(resolve => setTimeout(resolve, 25000));
+                } else {
+                    counter++;
+                    console.log(`[${formattedDate}] [Msg] Sent: ${counter}`);
+                }
+            } catch (error) {
+                console.error(`[${formattedDate}] [Err] ${error.message}`);
+                await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+        }
+
+        m.reply(`✅ Pesan telah berhasil dikirim sebanyak ${counter} kali ke username *${username}*`);
+    };
+
+    dycoders.sendMessage(username, message).catch(err => {
+        console.error("Unhandled error:", err);
+        m.reply("Terjadi kesalahan saat mengirim pesan.");
+    });
+}
+break;
+
+
+
 
 
   default:

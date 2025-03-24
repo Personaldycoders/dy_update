@@ -1,7 +1,7 @@
 {
     "name": "bot_md_by_dycoders",
-    "version": "1.1.1",
-    "description": "up",
+    "version": "1.1.2",
+    "description": "no-kiss-no-hug-only-fix-bug",
     "main": "index.js",
     "type": "commonjs",
     "scripts": {
