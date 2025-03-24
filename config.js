@@ -17,6 +17,7 @@ global.mess = {
   limit: "Yahh limit lu habis",
   wait: `sabar...`,
   done: 'done cihuy',
+  res: 'khusus reseller cik',
   prem: 'khusus prem cik'
 }
 global.ifowner = "khusus owner cik"
