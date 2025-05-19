@@ -2,11 +2,21 @@
 // NO HAPUS WM! INI JIKA KALIAN TAU CARA MENGHARGAI SEBUAH CODE PADA SC INI
 // Kalian Bisa Ganti rename atau pun itu kecuali Hapus Wm INI
 // TQ TO ME 
+<<<<<<< HEAD
 // No kiss No hug Only Fix bug
 
 //SALURAN DEV "https://whatsapp.com/channel/0029VagpRL811ulLEm4TnO0h" WA DEVELOPER wa.me/6285719898124
 require('./config');
 require('./justmylib/lib/database/funcku');
+=======
+// No kis No hug Only Fix bug
+
+//SALURAN DEV "https://whatsapp.com/channel/0029VagpRL811ulLEm4TnO0h" WA DEVELOPER wa.me/6285719898124
+
+
+
+require('./config');
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 const fs = require('fs');
 const util = require("util");
 const path = require("path")
@@ -21,9 +31,15 @@ const {
 const { promisify } = require('util');
 const crypto = require('crypto');
 const { Client } = require('ssh2');
+<<<<<<< HEAD
 const { TelegraPh, UploadFileUgu } = require('./justmylib/lib/uploader');
  
 const uploadImage = require('./justmylib/lib/uploadImage.js')
+=======
+const { TelegraPh, UploadFileUgu } = require('./start//lib/uploader');
+ 
+const uploadImage = require('./start/lib/uploadImage.js')
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 const { 
   default:
   baileys,
@@ -56,18 +72,33 @@ module.exports = dycoders = async (dycoders, m, chatUpdate, store) => {
       m.mtype === "messageContextInfo" ? m.message.buttonsResponseMessage?.selectedButtonId || m.message.listResponseMessage?.singleSelectReply.selectedRowId || m.text : ""
 );
 const siowner = [dycoders.decodeJid(dycoders.user.id), ...global.rowner.map(([number]) => number), ].map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net").includes(m.sender);
+<<<<<<< HEAD
 const premium = fs.readFileSync('./justmylib/lib/database/prem.json').toString()
 const prem = JSON.parse(fs.readFileSync('./justmylib/lib/database/prem.json').toString())
+=======
+const premium = fs.readFileSync('./start/lib/database/prem.json').toString()
+const prem = JSON.parse(fs.readFileSync('./start/lib/database/prem.json').toString())
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 const isPremium = siowner ? true : [premium, ...prem].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
 
 
 //Reseller function
+<<<<<<< HEAD
 const ress = JSON.parse(fs.readFileSync('./justmylib/lib/database/reseller.json').toString());
 const isreseller = siowner ? true : [premium, ...ress].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender);
 
 
 
 const own = JSON.parse(fs.readFileSync('./justmylib/lib/database/owner.json').toString())
+=======
+const reseller = fs.readFileSync('./start/lib/database/reseller.json').toString()
+const ress = JSON.parse(fs.readFileSync('./start/lib/database/reseller.json').toString())
+const isreseller = siowner ? true : [premium, ...ress].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
+
+
+
+const own = JSON.parse(fs.readFileSync('./start/lib/database/owner.json').toString())
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 const sender = m.key.fromMe || [dycoders.decodeJid(dycoders.user.id), ...global.rowner.map(([number]) => number)]
     .map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
     .includes(m.key.participant || m.key.remoteJid)
@@ -84,11 +115,19 @@ const budy = (typeof m.text === 'string' ? m.text : '');
     
     const from = m.key.remoteJid;
     const isGroup = from.endsWith("@g.us");
+<<<<<<< HEAD
     const kontributor = JSON.parse(fs.readFileSync('./justmylib/lib/database/owner.json'));
     const tumbn = global.tumb
 const thumbnail = tumbn[Math.floor(Math.random() * tumbn.length)];
     const botNumber = await dycoders.decodeJid(dycoders.user.id);
 const user_ban = JSON.parse(fs.readFileSync('./justmylib/lib/database/banned.json'))
+=======
+    const kontributor = JSON.parse(fs.readFileSync('./start/lib/database/owner.json'));
+    const tumbn = global.tumb
+const thumbnail = tumbn[Math.floor(Math.random() * tumbn.length)];
+    const botNumber = await dycoders.decodeJid(dycoders.user.id);
+const user_ban = JSON.parse(fs.readFileSync('./start/lib/database/banned.json'))
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
  const isBan = user_ban.includes(m.sender)
  if (isBan && !isCmd) return;
@@ -111,7 +150,11 @@ const groupName = groupMetadata.subject || "";
 const participants = groupMetadata.participants || [];
 const groupAdmins = participants.filter(v => v.admin !== null).map(v => v.id);
 const groupMembers = participants.map(v => v.id);
+<<<<<<< HEAD
 const { islamai } = require('./justmylib/lib/islamai');
+=======
+const { islamai } = require('./start/lib/islamai');
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
     const isBotGroupAdmins = isGroup ? groupAdmins.includes(botNumber) : false;
     const isBotAdmins = m?.isGroup ? groupAdmins.includes(botNumber) : false;
 const isAdmins = m?.isGroup ? groupAdmins.includes(m?.sender) : false;
@@ -130,8 +173,13 @@ const isAdmins = m?.isGroup ? groupAdmins.includes(m?.sender) : false;
       runtime,
       fetchJson,
       sleep 
+<<<<<<< HEAD
     } = require('./justmylib/lib/myfunction');
 const { mediafire, tiktokDl } = require('./justmylib/lib/scraper');
+=======
+    } = require('./start/lib/myfunction');
+const { mediafire, tiktokDl } = require('./start/lib/scraper');
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
 const formatp = (bytes) => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -150,6 +198,7 @@ if (!m.key.fromMe && global.autoread) {
      await dycoders.readMessages([readkey]);
  }
         dycoders.sendPresenceUpdate('available', m.chat)
+<<<<<<< HEAD
 
 const dbPath = path.join(__dirname, './justmylib/lib/database/pendaftar.json');
 
@@ -221,6 +270,10 @@ function addLimit(sender, jumlah) {
 
 let limitnya = getLimit(sender);
 let limit = getLimit(m.sender);
+=======
+      
+
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 async function getCookies() {
     try {
         const response = await axios.get('https://www.pinterest.com/csrf_error/');
@@ -242,7 +295,10 @@ async function getCookies() {
     }
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 function tiktoks(query) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -357,6 +413,60 @@ async function pinterest(query) {
         return [];
     }
 }
+<<<<<<< HEAD
+=======
+const snapinst = {
+    async app(url) {
+       const { data } = await axios.get('https://snapinst.app/');
+       const $ = cheerio.load(data);
+       const form = new FormData();
+    
+       form.append('url', url);
+       form.append('action', 'post');
+       form.append('lang', '');
+       form.append('cf-turnstile-response', '');
+       form.append('token', $('input[name=token]').attr('value'));
+    
+       const headers = {
+         ...form.getHeaders(),
+         'accept': '*/*',
+         'accept-language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+         'sec-ch-ua': '"Not A(Brand";v="8", "Chromium";v="132"',
+         'sec-ch-ua-mobile': '?1',
+         'sec-ch-ua-platform': '"Android"',
+         'sec-fetch-dest': 'empty',
+         'sec-fetch-mode': 'cors',
+         'sec-fetch-site': 'same-origin',
+         'Referer': 'https://snapinst.app/',
+         'Referrer-Policy': 'strict-origin-when-cross-origin'
+       };
+    
+       const jsbejad = await axios.post('https://snapinst.app/action2.php', form, { headers });
+       const ayok = new Function('callbuk', jsbejad.data.replace('eval', 'callbuk'));
+       
+       const html = await new Promise((resolve, reject) => {
+           ayok(t=>{
+             const code = t.split(".innerHTML = ")[1].split("; document.")[0];
+             resolve(eval(code));
+           });
+       });
+       
+       const _ = cheerio.load(html);
+       const res = {
+           avatar: _('.row img:eq(0)').attr('src'),
+           username: _('.row div.left:eq(0)').text().trim(),
+           urls: []
+       };
+       _('.row .download-item').each((i, e)=>{
+           res.urls.push(_(e).find('.download-bottom a').attr('href'));
+       });
+       
+       return res;
+    },
+};
+
+
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
 async function remini(urlPath, method) {
 	return new Promise(async (resolve, reject) => {
@@ -493,6 +603,69 @@ async function forbiden(text) {
     );
 }
 
+<<<<<<< HEAD
+=======
+
+
+const dbPath = path.join(__dirname, './start/lib/database/pendaftar.json');
+
+function loadDB() {
+    if (!fs.existsSync(dbPath)) {
+        fs.writeFileSync(dbPath, JSON.stringify([]));
+    }
+    return JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+}
+
+function saveDB(db) {
+    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+}
+
+function getLimit(sender) {
+    let db = loadDB();
+    let user = db.find(u => u.nomer === sender);
+
+    if (!user) {
+        user = { nomer: sender, nama: m.pushName, limit: parseInt(global.limitawal) || 10 };
+        db.push(user);
+        saveDB(db);
+    }
+
+    return user.limit;
+}
+
+function uselimit(sender) {
+    let db = loadDB();
+    let index = db.findIndex(u => u.nomer === sender);
+
+    if (index === -1) {
+        db.push({ nomer: sender, nama: m.pushName, limit: parseInt(global.limitawal) || 10 });
+        index = db.length - 1;
+    }
+
+    if (db[index].limit > 0) {
+        db[index].limit -= 1;
+        saveDB(db);
+    }
+}
+
+function addLimit(sender, jumlah) {
+    let db = loadDB();
+    let user = db.find(u => u.nomer === sender);
+
+    if (!user) {
+        user = { nomer: sender, nama: m.pushName, limit: parseInt(global.limitawal) || 10 };
+        db.push(user);
+    }
+
+    jumlah = parseInt(jumlah);
+    if (isNaN(jumlah)) return console.log(`Error: jumlah limit bukan angka!`);
+
+    user.limit += jumlah;
+    saveDB(db);
+}
+let limitnya = getLimit(sender);
+let limit = getLimit(m.sender);
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 const penggunaan = (teks) => {
 return `Penggunaan :\n\n${prefix + command} *${teks}*`
 }
@@ -642,11 +815,19 @@ _Bot ini dikembangkan oleh_ *dycoders.xyz*
 ╭───〔 *CLOUDFLARE MENU* 〕───✧  
 │ 🌐 *.subdomain1* = cloud-ku.my.id  
 │ 🌐 *.subdomain2* = mycloudpremiumid.xyz  
+<<<<<<< HEAD
 │ 🌐 *.subdomain3* = node-i.my.id  
 │ 🌐 *.subdomain4* = panel-i.biz.id  
 │ 🌐 *.subdomain5* = premium-host.biz.id  
 │ 🌐 *.subdomain6* = serverku-pterodactyl.web.id  
 │ 🌐 *.subdomain7* = srv-i.my.id  
+=======
+│ 🌐 *.subdomain3* = serverku-pterodactyl.web.id  
+│ 🌐 *.subdomain4* = pterodactyl-host.xyz  
+│ 🌐 *.subdomain5* = node-i.my.id  
+│ 🌐 *.subdomain6* = panel-i.biz.id  
+│ 🌐 *.subdomain7* = premium-host.biz.id  
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 │ 🛠️  .*editdns* id|yes/no  
 │ 📌  *.addiprules* note|ipvps  
 │ 🌩  *.autocf* iddomain|ipvps  
@@ -758,6 +939,11 @@ Gunakan perintah yang tersedia untuk menikmati fitur terbaik!
 │ ✶ .unbanuser [number]
 │ ✶ .self  
 │ ✶ .public  
+<<<<<<< HEAD
+=======
+│ ✶ .deletedns1 id  
+│ ✶ .deletedns2 id  
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 │ ✶ .setdomain  
 │ ✶ .setdomain-v2  
 │ ✶ .setplta  
@@ -803,12 +989,21 @@ Gunakan perintah yang tersedia untuk menikmati fitur terbaik!
 
 ╭── CLOUDFLARE MENU ──╮  
 │ ⌬ .subdomain1 > cloud-ku.my.id  
+<<<<<<< HEAD
 │ ⌬ .subdomain2 > mycloudpremiumid.xyz  
 │ ⌬ .subdomain3 > node-i.my.id  
 │ ⌬ .subdomain4 > panel-i.biz.id  
 │ ⌬ .subdomain5 > premium-host.biz.id  
 │ ⌬ .subdomain6 > serverku-pterodactyl.web.id  
 │ ⌬ .subdomain7 > srv-i.my.id  
+=======
+│ ⌬ .subdomain2 > mycloudpremium.xyz  
+│ ⌬ .subdomain3 > serverku-pterodactyl.web.id  
+│ ⌬ .subdomain4 > pterodactyl-host.xyz  
+│ ⌬ .subdomain5 > node-i.my.id  
+│ ⌬ .subdomain6 > panel-i.biz.id  
+│ ⌬ .subdomain7 > premium-host.biz.id  
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 │ ⌬ .editdns id|yes/no  
 │ ⌬ .addiprules note|ipvps  
 │ ⌬ .autocf iddomain|ipvps  
@@ -930,7 +1125,11 @@ const { execSync } = require('child_process')
   if (!text) return Reply(`Contoh: ${prefix+command} halo saya dycoders.xyz`)
   if (text.length > 40) return Reply(`Karakter terbatas, max 40 huruf character!`)
   const words = text.split(" ")
+<<<<<<< HEAD
   const tempDir = path.join(process.cwd(), './justmylib/tmp')
+=======
+  const tempDir = path.join(process.cwd(), './start/tmp')
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir)
   const framePaths = []
   try {
@@ -1160,6 +1359,7 @@ let u = inputNumber + '@s.whatsapp.net';
     }  
     break;  
 }
+<<<<<<< HEAD
 case 'addreseller': {
     if (!siowner) return forbiden(mess.owner);
     if (!args[0]) return Reply(penggunaan("628xxx"));
@@ -1220,6 +1420,58 @@ case 'delreseller': {
     }, { quoted: m });
 }
 break;
+=======
+
+
+case 'addreseller': {
+if (!siowner) return forbiden(mess.owner);
+if (!args[0]) return Reply(penggunaan("628xxx"))
+var sireseller = text.split("|")[0].replace(/[^0-9]/g, '')
+let target = sireseller + '@s.whatsapp.net'
+ress.push(sireseller)
+fs.writeFileSync('./start/lib/database/reseller.json', JSON.stringify(sireseller))
+Reply(`Sukses menambah reseller @${target.split('@')[0]}`)
+try {
+var ppnya = await dycoders.profilePictureUrl(target, "image")
+} catch {
+var ppnya = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png?q=60"
+}
+dycoders.sendMessage(target, {
+image: {
+url: ppnya
+},
+caption: "Selamat, kamu sudah bisa mengakses fitur"
+}, {
+quoted: m
+})
+}
+break
+
+case 'delreseller': {
+if (!siowner) return forbiden(mess.owner);
+if (!args[0]) return Reply(penggunaan("628xxx"))
+var delresl = text.split("|")[0].replace(/[^0-9]/g, '')
+let target = delresl + '@s.whatsapp.net'
+unp = own.indexOf(delresl)
+ress.splice(unp, 1)
+fs.writeFileSync('./start/lib/database/reseller.json', JSON.stringify(sireseller))
+Reply(`Sukses menghapus reseller @${target.split('@')[0]}`)
+try {
+var ppnya = await dycoders.profilePictureUrl(target, "image")
+} catch {
+var ppnya = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png?q=60"
+}
+dycoders.sendMessage(target, {
+image: {
+url: ppnya
+},
+caption: "Yahh kamu udah gk bisa akses cpanel lagi"
+}, {
+quoted: m
+})
+}
+break
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
 case "self": {
     const siowner = [dycoders.decodeJid(dycoders.user.id), ...global.rowner.map(([number]) => number)]
@@ -1335,7 +1587,11 @@ case 'menu': {
             },
             {
                 buttonId: 'action',
+<<<<<<< HEAD
                 buttonText: { displayText: 'dycoders' },
+=======
+                buttonText: { displayText: 'kntol' },
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
                 type: 4,
                 nativeFlowInfo: {
                     name: 'single_select',
@@ -1688,6 +1944,7 @@ let server = serverData.attributes;
     }
     break;
 }
+<<<<<<< HEAD
 
 case "addsrv": {
     if (!isreseller) return forbiden(mess.res);
@@ -1812,10 +2069,78 @@ case "addsrv": {
     } catch (error) {
         console.error(error);
         Reply("❌ Terjadi kesalahan saat memproses data. Cek kembali konfigurasi dan input Anda.");
+=======
+case "addsrv": {
+    if (!isreseller) return forbiden(mess.res);
+
+    if (!text) return Reply("Format: .addsrv 1gb,iduser");
+
+    let t = text.split(',');
+    if (t.length < 2) return Reply(`Contoh: .addsrv 1gb,iduser`);
+
+    let package = t[0].trim().toLowerCase();
+    let userID = t[1].trim();
+
+    let specs = {
+        "1gb": { ram: "1000", disk: "1000", cpu: "40" },
+        "2gb": { ram: "2000", disk: "1000", cpu: "60" },
+        "3gb": { ram: "3000", disk: "2000", cpu: "80" },
+        "4gb": { ram: "4000", disk: "2000", cpu: "100" },
+        "5gb": { ram: "5000", disk: "3000", cpu: "120" },
+        "6gb": { ram: "6000", disk: "3000", cpu: "140" },
+        "7gb": { ram: "7000", disk: "4000", cpu: "160" },
+        "8gb": { ram: "8000", disk: "4000", cpu: "180" },
+        "9gb": { ram: "9000", disk: "5000", cpu: "200" },
+        "10gb": { ram: "10000", disk: "5000", cpu: "220" },
+        "unli": { ram: "0", disk: "0", cpu: "0" } 
+    };
+
+    if (!specs[package]) return Reply("Paket tidak valid!");
+
+    let { ram, disk, cpu } = specs[package];
+
+    let deskripsi = `Server ${package.toUpperCase()} - Aktif 1 Bulan`;
+
+    try {
+        let serverRes = await fetch(`${domain}/api/application/servers`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apikey}`
+            },
+            body: JSON.stringify({
+                name: `Server ${package}`,
+                description: deskripsi,
+                user: parseInt(userID),
+                egg: parseInt(eggnya),
+                docker_image: "ghcr.io/parkervcp/yolks:nodejs_18",
+                startup: "npm start",
+                environment: {
+                    "INST": "npm",
+                    "USER_UPLOAD": "0",
+                    "AUTO_UPDATE": "0",
+                    "CMD_RUN": "npm start"
+                },
+                limits: { memory: ram, swap: 0, disk, io: 500, cpu },
+                feature_limits: { databases: 0, backups: 0, allocations: 0 },
+                deploy: { locations: [parseInt(locnya)], dedicated_ip: false, port_range: [] }
+            })
+        });
+
+        let serverData = await serverRes.json();
+        if (serverData.errors) return Reply(JSON.stringify(serverData.errors[0], null, 2));
+
+        Reply(`✅ *Server berhasil dibuat!*\n\n📩 Paket: ${package.toUpperCase()} telah ditambahkan ke user ID: *${userID}*`);
+    } catch (error) {
+        console.error(error);
+        Reply("❌ Terjadi kesalahan saat membuat server.");
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
     }
     break;
 }
 
+<<<<<<< HEAD
 case "addsrv": {
     if (!isreseller) return forbiden(mess.res);
 
@@ -1939,6 +2264,73 @@ case "addsrv": {
     } catch (error) {
         console.error(error);
         Reply("❌ Terjadi kesalahan saat memproses data. Cek kembali konfigurasi dan input Anda.");
+=======
+case "addsrv-v2": {
+    if (!isreseller) return forbiden(mess.res);
+
+    if (!text) return Reply("Format: .addsrv 1gb,iduser");
+
+    let t = text.split(',');
+    if (t.length < 2) return Reply(`Contoh: .addsrv 1gb,iduser`);
+
+    let package = t[0].trim().toLowerCase();
+    let userID = t[1].trim();
+
+    let specs = {
+        "1gb": { ram: "1000", disk: "1000", cpu: "40" },
+        "2gb": { ram: "2000", disk: "1000", cpu: "60" },
+        "3gb": { ram: "3000", disk: "2000", cpu: "80" },
+        "4gb": { ram: "4000", disk: "2000", cpu: "100" },
+        "5gb": { ram: "5000", disk: "3000", cpu: "120" },
+        "6gb": { ram: "6000", disk: "3000", cpu: "140" },
+        "7gb": { ram: "7000", disk: "4000", cpu: "160" },
+        "8gb": { ram: "8000", disk: "4000", cpu: "180" },
+        "9gb": { ram: "9000", disk: "5000", cpu: "200" },
+        "10gb": { ram: "10000", disk: "5000", cpu: "220" },
+        "unli": { ram: "0", disk: "0", cpu: "0" } 
+    };
+
+    if (!specs[package]) return Reply("Paket tidak valid!");
+
+    let { ram, disk, cpu } = specs[package];
+
+    let deskripsi = `Server ${package.toUpperCase()} - Aktif 1 Bulan`;
+
+    try {
+        let serverRes = await fetch(`${cpanelv2}/api/application/servers`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${siptakey2}`
+            },
+            body: JSON.stringify({
+                name: `Server ${package}`,
+                description: deskripsi,
+                user: parseInt(userID),
+                egg: parseInt(eggnya),
+                docker_image: "ghcr.io/parkervcp/yolks:nodejs_18",
+                startup: "npm start",
+                environment: {
+                    "INST": "npm",
+                    "USER_UPLOAD": "0",
+                    "AUTO_UPDATE": "0",
+                    "CMD_RUN": "npm start"
+                },
+                limits: { memory: ram, swap: 0, disk, io: 500, cpu },
+                feature_limits: { databases: 0, backups: 0, allocations: 0 },
+                deploy: { locations: [parseInt(locnya)], dedicated_ip: false, port_range: [] }
+            })
+        });
+
+        let serverData = await serverRes.json();
+        if (serverData.errors) return Reply(JSON.stringify(serverData.errors[0], null, 2));
+
+        Reply(`✅ *Server berhasil dibuat!*\n\n📩 Paket: ${package.toUpperCase()} telah ditambahkan ke user ID: *${userID}*`);
+    } catch (error) {
+        console.error(error);
+        Reply("❌ Terjadi kesalahan saat membuat server.");
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
     }
     break;
 }
@@ -2132,7 +2524,11 @@ let server = serverData.attributes;
 
 case 'tagsw': case 'upsw': {
 if (!siowner) return forbiden(mess.owner)
+<<<<<<< HEAD
     const stat = {key: {fromMe: false,participant: `0@s.whatsapp.net`, ...(m.chat ? { remoteJid: "status@broadcast" } : {})},message: { "imageMessage": {"url": "https://mmg.whatsapp.net/d/f/At0x7ZdIvuicfjlf9oWS6A3AR9XPh0P-hZIVPLsI70nM.enc","mimetype": "image/jpeg","caption": "","fileSha256": "+Ia+Dwib70Y1CWRMAP9QLJKjIJt54fKycOfB2OEZbTU=","fileLength": "28777","height": 1080,"width": 1079,"mediaKey": "vXmRR7ZUeDWjXy5iQk17TrowBzuwRya0errAFnXxbGc=","fileEncSha256": "sR9D2RS5JSifw49HeBADguI23fWDz1aZu4faWG/CyRY=","directPath": "/v/t62.7118-24/21427642_840952686474581_572788076332761430_n.enc?oh=3f57c1ba2fcab95f2c0bb475d72720ba&oe=602F3D69","mediaKeyTimestamp": "1610993486","jpegThumbnail": fs.readFileSync('./justmylib/lib/dy.jpg'),"scansSidecar": "1W0XhfaAcDwc7xh1R8lca6Qg/1bB4naFCSngM2LKO2NoP5RI7K+zLw=="}}}
+=======
+    const stat = {key: {fromMe: false,participant: `0@s.whatsapp.net`, ...(m.chat ? { remoteJid: "status@broadcast" } : {})},message: { "imageMessage": {"url": "https://mmg.whatsapp.net/d/f/At0x7ZdIvuicfjlf9oWS6A3AR9XPh0P-hZIVPLsI70nM.enc","mimetype": "image/jpeg","caption": "","fileSha256": "+Ia+Dwib70Y1CWRMAP9QLJKjIJt54fKycOfB2OEZbTU=","fileLength": "28777","height": 1080,"width": 1079,"mediaKey": "vXmRR7ZUeDWjXy5iQk17TrowBzuwRya0errAFnXxbGc=","fileEncSha256": "sR9D2RS5JSifw49HeBADguI23fWDz1aZu4faWG/CyRY=","directPath": "/v/t62.7118-24/21427642_840952686474581_572788076332761430_n.enc?oh=3f57c1ba2fcab95f2c0bb475d72720ba&oe=602F3D69","mediaKeyTimestamp": "1610993486","jpegThumbnail": fs.readFileSync('./start/lib/dy.jpg'),"scansSidecar": "1W0XhfaAcDwc7xh1R8lca6Qg/1bB4naFCSngM2LKO2NoP5RI7K+zLw=="}}}
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
     if (!text) return Reply(`Masukkan teks untuk caption status dan. reply \n- video\n- gambar\n- audio\n- text`);
     let [caption, jid] = text.split('|');
     if (!jid) return Reply("Masukkan JID setelah tanda '|'");
@@ -2257,7 +2653,11 @@ break;
 
 
 case 'ambileggs': {
+<<<<<<< HEAD
     let filePath = './justmylib/lib/eggs.zip';
+=======
+    let filePath = './start/lib/eggs.zip';
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
  
     const fs = require('fs');
@@ -2845,6 +3245,7 @@ if (res.errors) return Reply('User tidak ditemukan!')
 Reply('Sukses menghapus user!')
 }
 break
+<<<<<<< HEAD
 
 
 case 'mediafire': {
@@ -2888,6 +3289,93 @@ case 'mediafire': {
   }
 }
 break;
+=======
+case 'mediafire': {
+  
+async function mediaFire(url) {
+  try {
+    const response = await fetch('https://r.jina.ai/' + url);
+    const text = await response.text();
+
+    const result = {
+      title: (text.match(/Title: (.+)/) || [])[1]?.trim() || '',
+      link: (text.match(/URL Source: (.+)/) || [])[1]?.trim() || '',
+      filename: '',
+      url: '',
+      size: '',
+      repair: ''
+    };
+
+    if (result.link) {
+      const fileMatch = result.link.match(/\/([^\/]+\.zip)/);
+      if (fileMatch) result.filename = fileMatch[1];
+    }
+
+    const matches = [...text.matchAll(/\[(.*?)\]\((https:\/\/[^\s]+)\)/g)];
+    for (const match of matches) {
+      const desc = match[1].trim();
+      const link = match[2].trim();
+      
+      if (desc.toLowerCase().includes('download') && desc.match(/\((\d+(\.\d+)?[KMGT]B)\)/)) {
+        result.url = link;
+        result.size = (desc.match(/\((\d+(\.\d+)?[KMG]?B)\)/) || [])[1] || '';
+      }
+      if (desc.toLowerCase().includes('repair')) {
+        result.repair = link;
+      }
+    }
+
+    return result;
+  } catch (error) {
+    return { error: error.message };
+  }
+}
+
+if (!text) return Reply('Masukin URL MediaFire-nya!');
+
+try {
+    const url = text.trim();
+    const result = await mediaFire(url);
+
+    if (result.error) return Reply(`❌ Gagal mengambil data: ${result.error}`);
+    if (!result.url) return Reply('❌ Gagal mendapatkan link download!');
+
+    let caption = `📂 *MediaFire Download*\n\n`;
+    caption += `📌 *Nama:* ${result.filename || 'Unknown'}\n`;
+    caption += `📏 *Ukuran:* ${result.size || 'Unknown'}\n`;
+    caption += `🔗 *Link:* ${result.url}\n\n`;
+
+    Reply(caption);
+
+    // 🔹 Nama File Acak
+    const randomFileName = `file_${Math.random().toString(36).slice(2, 10)}.zip`;
+
+    // 🔹 Download File
+    const response = await fetch(result.url);
+    if (!response.ok) return Reply('❌ Gagal mendownload file!');
+
+    const fileBuffer = await response.buffer();
+
+    // 🔹 Kirim File ke Chat
+    await dycoders.sendMessage(m.chat, {
+        document: fileBuffer,
+        mimetype: 'application/zip', 
+        fileName: randomFileName
+    }, { quoted: m });
+
+    // 🔹 Hapus File dari Buffer
+    fileBuffer.fill(0);
+    console.log(`✅ File ${randomFileName} sudah dihapus dari memori.`);
+    
+} catch (err) {
+    console.error(err);
+    Reply('❌ Terjadi kesalahan! Coba lagi nanti.');
+}
+}
+break;
+
+
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 case "installpanel": {
 if (limitnya < 1) return forbiden(mess.limit)
 if (!text) return Reply(example("ipvps|pwvps|panel.com|node.com"))
@@ -3707,7 +4195,11 @@ case 'splay': {
   if (limitnya < 1) return forbiden(mess.limit)
     if (!text) return Reply("Silakan masukkan nama lagu atau URL Spotify untuk diunduh!");
 
+<<<<<<< HEAD
     const Spotify = require('./justmylib/lib/spotify.js');
+=======
+    const Spotify = require('./start/lib/spotify.js');
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
     const axios = require('axios');
 
@@ -3787,8 +4279,13 @@ case 'editdns': {
     let [recordId, proxy] = text.split('|').map(t => t.trim());
     let proxied = proxy.toLowerCase() === 'yes';
 
+<<<<<<< HEAD
     let apiToken = global.ApiDns1;
     let zoneIds = [global.zoneid1, global.zoneid2, global.zoneid3, global.zoneid5, global.zoneid6, global.zoneid7]; 
+=======
+    let apiToken = global.ApiDns;
+    let zoneIds = [global.zoneid2, global.zoneid3, global.zoneid5, global.zoneid6, global.zoneid7, global.zoneid8]; 
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
     let success = false;
     let lastError = null;
@@ -3830,7 +4327,11 @@ if (!args[0]) return Reply(penggunaan("628xxx"))
 var premm = text.split("|")[0].replace(/[^0-9]/g, '')
 let target = premm + '@s.whatsapp.net'
 prem.push(premm)
+<<<<<<< HEAD
 fs.writeFileSync('./justmylib/lib/database/prem.json', JSON.stringify(prem))
+=======
+fs.writeFileSync('./start/lib/database/prem.json', JSON.stringify(prem))
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 Reply(`Sukses menambah premium @${target.split('@')[0]}`)
 try {
 var ppnya = await dycoders.profilePictureUrl(target, "image")
@@ -3855,7 +4356,11 @@ var premmm = text.split("|")[0].replace(/[^0-9]/g, '')
 let target = premmm + '@s.whatsapp.net'
 unp = own.indexOf(premmm)
 prem.splice(unp, 1)
+<<<<<<< HEAD
 fs.writeFileSync('./justmylib/lib/database/prem.json', JSON.stringify(prem))
+=======
+fs.writeFileSync('./start/lib/database/prem.json', JSON.stringify(prem))
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 Reply(`Sukses menghapus premium @${target.split('@')[0]}`)
 try {
 var ppnya = await dycoders.profilePictureUrl(target, "image")
@@ -3955,7 +4460,11 @@ case 'addiprules': {
 
     let [note, ip] = text.split('|').map(t => t.trim()); 
 
+<<<<<<< HEAD
     let apiToken = global.ApiDns; 
+=======
+    let apiToken = global.ApiRules; 
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
     let accountId = global.AccountId; 
     let mode = "whitelist";
 
@@ -3991,10 +4500,17 @@ case 'autocf': {
     let [recordId, ip] = text.split('|').map(t => t.trim());
     let proxied = true; 
 
+<<<<<<< HEAD
     let apiTokenDns = global.ApiDns1;
     let apiTokenRules = global.ApiDns1;
     let accountId = global.AccountId;
     let zoneIds = [global.zoneid1, global.zoneid2, global.zoneid3, global.zoneid5, global.zoneid6, global.zoneid7]; 
+=======
+    let apiTokenDns = global.ApiDns;
+    let apiTokenRules = global.ApiRules;
+    let accountId = global.AccountId;
+    let zoneIds = [global.zoneid2, global.zoneid3, global.zoneid5, global.zoneid6, global.zoneid7, global.zoneid8]; 
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
     let success = false;
     let lastError = null;
 
@@ -4235,7 +4751,11 @@ case 'subdomain5': {
     
     let apiToken = global.ApiDns5;
     let zoneId = global.zoneid5;
+<<<<<<< HEAD
     let domain = global.domain5;
+=======
+    let domain = global.wings;
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
     let response = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`, {
         method: 'POST',
@@ -4296,6 +4816,7 @@ if (!isPremium) return forbiden(mess.prem)
     let [hostname, ip, proxy] = text.split('|').map(t => t.trim());
     let proxied = proxy.toLowerCase() === 'yes';
     
+<<<<<<< HEAD
     let apiToken = global.ApiDns1;
     let zoneId = global.zoneid1;
     let domain = global.domain1;
@@ -4362,6 +4883,11 @@ if (!isPremium) return forbiden(mess.prem)
     let apiToken = global.ApiDns7;
     let zoneId = global.zoneid7;
     let domain = global.domain7;
+=======
+    let apiToken = global.ApiDns5;
+    let zoneId = global.zoneid6;
+    let domain = global.domain6;
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
     let response = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`, {
         method: 'POST',
@@ -4553,9 +5079,78 @@ case 'subdomain6': {
     let [hostname, ip, proxy] = text.split('|').map(t => t.trim());
     let proxied = proxy.toLowerCase() === 'yes';
     
+<<<<<<< HEAD
     let apiToken = global.ApiDns6;
     let zoneId = global.zoneid6;
     let domain = global.domain6;
+=======
+    let apiToken = global.ApiDns7;
+    let zoneId = global.zoneid7;
+    let domain = global.domain7;
+
+    let response = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            type: 'A',
+            name: `${hostname}.${domain}`,
+            content: ip,
+            ttl: 1,
+            proxied
+        })
+    });
+    
+    let result = await response.json();
+    if (result.success) {
+        let fullSubdomain = `${hostname}.${domain}`;
+        let recordId = result.result.id;
+        let teks = `✅ Subdomain berhasil dibuat!\n🌐 Hostname: ${fullSubdomain}\n📍 IP: ${ip}\n🛡 Proxy: ${proxied ? 'Aktif' : 'Nonaktif'}\n🔗 Link: https://${fullSubdomain}\n🆔 ID: ${recordId}`;
+        
+        let msg = generateWAMessageFromContent(m.chat, {
+            viewOnceMessage: {
+                message: {
+                    "messageContextInfo": { "deviceListMetadata": {}, "deviceListMetadataVersion": 2 },
+                    interactiveMessage: {
+                        body: { text: teks },
+                        footer: { text: wm },
+                        nativeFlowMessage: {
+                            buttons: [
+                                {
+                                    "name": "cta_copy",
+                                    "buttonParamsJson": `{"display_text": "Copy ID","copy_code": "${recordId}"}`
+                                },
+                                {
+                                    "name": "cta_copy",
+                                    "buttonParamsJson": `{"display_text": "Copy Domain","copy_code": "${fullSubdomain}"}`
+                                }
+                            ],
+                        },
+                    },
+                },
+            },
+        }, { quoted: m });
+        
+        await dycoders.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+    } else {
+        Reply(`❌ Gagal membuat subdomain!\n🔻 Error: ${JSON.stringify(result.errors, null, 2)}`);
+    }
+    break;
+}
+
+case 'subdomain7': {
+    if (!isPremium) return forbiden(mess.prem)
+    if (!text.includes('|')) return Reply('Format salah! Contoh: .subdomain7 sub|123.456.789.10|yes');
+
+    let [hostname, ip, proxy] = text.split('|').map(t => t.trim());
+    let proxied = proxy.toLowerCase() === 'yes';
+    
+    let apiToken = global.ApiDns8;
+    let zoneId = global.zoneid8;
+    let domain = global.domain8;
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
     let response = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`, {
         method: 'POST',
@@ -4947,6 +5542,7 @@ await dycoders.groupParticipantsUpdate(m.chat, [users], 'remove')
 await Reply(`Succes Kick anomali`)
 }
 break
+<<<<<<< HEAD
 case "ig":
 case "instagram": {
     if (!text) return Reply("Masukkan URL Instagram!");
@@ -4971,16 +5567,41 @@ case "instagram": {
             await dycoders.sendMessage(m.chat, {
                 [isVideo ? 'video' : 'image']: { url: media.url },
                 caption: i === 0 ? caption : ''
+=======
+
+case "ig": case 'instagram' : {
+    if (!text) return Reply("Masukkan URL Instagram!");
+    
+    try {
+        const result = await snapinst.app(text);
+        if (result.urls.length === 0) return Reply("Gagal mendapatkan media!");
+        
+        let caption = `👤 *Username:* ${result.username}\n🔗 *Link:* ${text}`;
+        if (result.avatar) caption += ``;
+        
+        for (let i = 0; i < result.urls.length; i++) {
+            await dycoders.sendMessage(m.chat, { 
+                video: { url: result.urls[i] }, 
+                caption: caption 
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
             }, { quoted: m });
         }
     } catch (err) {
         console.error(err);
+<<<<<<< HEAD
         Reply("Terjadi kesalahan saat mengakses API.");
+=======
+        Reply("Terjadi kesalahan saat mengambil data.");
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
     }
 }
 break;
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 case "spotifydl": {
     if (!text) return Reply("Linknya mana om?\nEX: https://open.spotify.com/xxxxxxx");
 
@@ -5059,7 +5680,11 @@ case "spotifydl": {
 
 
 case "tt": case "tiktok": {
+<<<<<<< HEAD
 if (limitnya < 1) return forbiden(mess.limit);
+=======
+  if (limitnya < 1) return forbiden(mess.limit)
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 if (!text) return Reply(example("url"))
 
 await tiktokDl(q).then(async (result) => {
@@ -5310,7 +5935,26 @@ const exec = await execSync(`zip -r backup.zip ${ls.join(" ")}`);
 await dycoders.sendMessage(m.chat, { document: await fs.readFileSync("./backup.zip"), mimetype: "application/zip", fileName: "dycoders.zip",},{quoted: fswtag}); await execSync("rm -rf backup.zip");
 }
 break
+<<<<<<< HEAD
 
+=======
+case 'addlimit': {
+if (!siowner) return Reply(mess.owner);
+    let [nomor, jumlah] = text.split(',');
+
+    if (!nomor || !jumlah) return Reply('Contoh: .addlimit 628xxx,10');
+
+    nomor = nomor.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
+    jumlah = parseInt(jumlah);
+
+    if (isNaN(jumlah)) return Reply('Jumlah harus angka!');
+
+    addLimit(nomor, jumlah);
+    Reply(`✅ Berhasil menambahkan ${jumlah} limit ke ${nomor}!`);
+    
+    break;
+}
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
 case 'delsampah': {
   if (!siowner) return Reply(mess.owner);
@@ -5572,7 +6216,11 @@ case 'yt': {
         }
 
         if (isAudio) {
+<<<<<<< HEAD
             return dycoders.sendMessage(m.chat, { audio: { url: download }, mimetype: "audio/mpeg", ptt: true }, { quoted: m });
+=======
+            return dycoders.sendMessage(m.chat, { audio: { url: download }, mimetype: "audio/mpeg" }, { quoted: m });
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
         } else if (isVideo) {
             return dycoders.sendMessage(m.chat, { video: { url: download }, mimetype: "video/mp4" }, { quoted: m });
 
@@ -5782,7 +6430,11 @@ case 'play': {
               viewOnce: true,
           }, { quoted: m });
       } else if (isAudio) {
+<<<<<<< HEAD
           await dycoders.sendMessage(m.chat, { audio: { url: download }, mimetype: "audio/mpeg", ppt: true }, { quoted: m });
+=======
+          await dycoders.sendMessage(m.chat, { audio: { url: download }, mimetype: "audio/mpeg" }, { quoted: m });
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
       } else if (isVideo) {
           await dycoders.sendMessage(m.chat, { video: { url: download }, mimetype: "video/mp4" }, { quoted: m });
       }
@@ -5926,6 +6578,7 @@ case 'pinterest': {
 
     break;
 }
+<<<<<<< HEAD
 case 'customqris': {
     
     if (!text) return Reply(`Contoh:\n${prefix + command} <qrisData>|<nominal>\nContoh:\n${prefix + command} 0002010102...|10000`);
@@ -5990,6 +6643,8 @@ case 'customqris': {
 
     break;
 }
+=======
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
 
 
@@ -6219,7 +6874,11 @@ case 'qc': {
         }
 
        
+<<<<<<< HEAD
         const res = await (teks, ppuser, pushname);
+=======
+        const res = await quote(teks, ppuser, pushname);
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
         await dycoders.sendImageAsSticker(m.chat, res, m, {
             packname: `${global.packname}`,
             author: `${global.siowner}`
@@ -6467,7 +7126,11 @@ case 'banuser': {
     if (isBen) return Reply(`${who} sudah di banned!`);
 
     user_ban.push(who);
+<<<<<<< HEAD
     fs.writeFileSync('./justmylib/lib/database/banned.json', JSON.stringify(user_ban, null, 2));
+=======
+    fs.writeFileSync('./start/lib/database/banned.json', JSON.stringify(user_ban, null, 2));
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
     Reply(`Sukses menambah ban untuk @${who.split('@')[0]}`);
 }
 break;
@@ -6489,7 +7152,11 @@ case 'unbanuser': {
     const index = user_ban.indexOf(whe);
     if (index > -1) {
         user_ban.splice(index, 1);
+<<<<<<< HEAD
         fs.writeFileSync('./justmylib/lib/database/banned.json', JSON.stringify(user_ban, null, 2));
+=======
+        fs.writeFileSync('./start/lib/database/banned.json', JSON.stringify(user_ban, null, 2));
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
         Reply(`Sukses menghapus ban untuk @${whe.split('@')[0]}`);
     } else {
         return Reply(`${whe} tidak ditemukan dalam daftar banned.`);
@@ -6498,6 +7165,7 @@ case 'unbanuser': {
 break;
 
 
+<<<<<<< HEAD
 
 
 case "imagen": {
@@ -6528,6 +7196,8 @@ case "imagen": {
 }
 break;
 
+=======
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 case 'boom-ngl': 
 case 'spam-ngl': {
     if (!siowner) return forbiden(mess.owner);
@@ -6613,6 +7283,7 @@ case 'spam-ngl': {
 }
 break;
 
+<<<<<<< HEAD
 case "daftarbot": {
     if (!text) return Reply("Masukkan nomor! Contoh: .daftarbot 628123456789");
 
@@ -6793,6 +7464,9 @@ case 'addlimit': {
     
     break;
 }
+=======
+
+>>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
 
 
 
