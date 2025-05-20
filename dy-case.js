@@ -12,6 +12,9 @@ const util = require("util");
 const path = require("path")
 const moment = require("moment-timezone");
 const sharp = require('sharp');
+
+const { createCanvas, loadImage, registerFont } = require('canvas');
+registerFont('./justmylib/lib/Impact.ttf', { family: 'Impact' });
 const cp = require('child_process');
 const {
   spawn,
@@ -22,7 +25,7 @@ const { promisify } = require('util');
 const crypto = require('crypto');
 const { Client } = require('ssh2');
 const { TelegraPh, UploadFileUgu } = require('./justmylib/lib/uploader');
- 
+const fakeUserAgent = require("fake-useragent");
 const uploadImage = require('./justmylib/lib/uploadImage.js')
 const { 
   default:
@@ -922,6 +925,50 @@ let encmedia = await dycoders.sendVideoAsSticker(m.chat, media, m, { packname: g
 Reply(`Reply gambar/video/gif dengan caption ${command}\nBatas durasi video 1-9 detik`)
 }}
 break
+
+
+
+
+case 'smeme': {
+
+  if (!quoted) return Reply(`Reply gambar dengan caption ${command} Top Text|Bottom Text`);
+  const mime = (quoted.msg || quoted).mimetype || '';
+  if (!/image/.test(mime)) return Reply(`Mime ${mime} tidak didukung!`);
+
+  const [atas = '', bawah = ''] = text.split`|`;
+
+  const pnis = quoted || m;
+  const media = await pnis.download();
+  const img = await loadImage(media);
+
+  const canvas = createCanvas(img.width, img.height);
+  const ctx = canvas.getContext('2d');
+
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  const fontSize = Math.floor(canvas.height / 5);
+  ctx.font = `${fontSize}px Impact`;
+  ctx.fillStyle = 'white';
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 5;
+  ctx.textAlign = 'center';
+
+  ctx.strokeText(atas.toUpperCase(), canvas.width / 2, fontSize + 20);
+  ctx.fillText(atas.toUpperCase(), canvas.width / 2, fontSize + 20);
+
+  ctx.strokeText(bawah.toUpperCase(), canvas.width / 2, canvas.height - 10);
+  ctx.fillText(bawah.toUpperCase(), canvas.width / 2, canvas.height - 10);
+
+  const buffer = canvas.toBuffer();
+
+  await dycoders.sendImageAsSticker(m.chat, buffer, m, {
+    packname: global.packname,
+    author: global.wm
+  });
+}
+break;
+
+
 
 case 'bratvideo': case 'bratvid': {
   if (limitnya < 1) return forbiden(mess.limit)
@@ -6613,58 +6660,127 @@ case 'spam-ngl': {
 }
 break;
 
-case "daftarbot": {
-    if (!text) return Reply("Masukkan nomor! Contoh: .daftarbot 628123456789");
+case 'douyins': {
+  if (!text) return Reply(`Contoh penggunaan:\n${prefix + command} fifty fifty`);
 
-    let nomor = text.replace(/[^0-9]/g, ''); 
-    let githubToken = "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"; 
-    let repoOwner = "Personaldycoders";
-    let repoName = "number";
-    let filePath = "number.json";
+  // Class DouyinSearchPage di-embed langsung
+  const axios = require('axios');
+  const cheerio = require('cheerio');
+  const vm = require('vm');
 
-    let apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+  class DouyinSearchPage {
+    constructor() {
+      this.baseURL = 'https://so.douyin.com/';
+      this.defaultParams = {
+        search_entrance: 'aweme',
+        enter_method: 'normal_search',
+        innerWidth: '431',
+        innerHeight: '814',
+        reloadNavStart: String(Date.now()),
+        is_no_width_reload: '1',
+        keyword: '',
+      };
+      this.cookies = {};
+      this.api = axios.create({
+        baseURL: this.baseURL,
+        headers: {
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+          'accept-language': 'id-ID,id;q=0.9',
+          'referer': 'https://so.douyin.com/',
+          'upgrade-insecure-requests': '1',
+          'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
+        }
+      });
 
-    try {
-        
-        let response = await fetch(apiUrl, {
-            headers: { Authorization: `token ${githubToken}` }
-        });
-        let fileData = await response.json();
-        if (!fileData.content) return Reply("Gagal mengambil data dari GitHub!");
+      this.api.interceptors.response.use(res => {
+        const setCookies = res.headers['set-cookie'];
+        if (setCookies) {
+          setCookies.forEach(c => {
+            const [name, value] = c.split(';')[0].split('=');
+            if (name && value) this.cookies[name] = value;
+          });
+        }
+        return res;
+      });
 
-      
-        let jsonData = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf-8'));
-
-        
-        if (jsonData.includes(nomor)) return Reply("Nomor sudah terdaftar!");
-
-     
-        jsonData.push(nomor);
-        let updatedContent = Buffer.from(JSON.stringify(jsonData, null, 2)).toString('base64');
-
-      
-        let updateResponse = await fetch(apiUrl, {
-            method: "PUT",
-            headers: {
-                Authorization: `token ${githubToken}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                message: `Tambah nomor ${nomor}`,
-                content: updatedContent,
-                sha: fileData.sha
-            })
-        });
-
-        if (!updateResponse.ok) return Reply("Gagal menyimpan data ke GitHub!");
-
-        Reply(`✅ Nomor ${nomor} berhasil didaftarkan!`);
-    } catch (error) {
-        console.error(error);
-        Reply("❌ Terjadi kesalahan, cek konfigurasi API GitHub!");
+      this.api.interceptors.request.use(config => {
+        if (Object.keys(this.cookies).length) {
+          config.headers['Cookie'] = Object.entries(this.cookies).map(([k, v]) => `${k}=${v}`).join('; ');
+        }
+        return config;
+      });
     }
-    break;
+
+    async initialize() {
+      try {
+        await this.api.get('/');
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    async search({ query }) {
+      try {
+        await this.initialize();
+        const params = { ...this.defaultParams, keyword: query, reloadNavStart: String(Date.now()) };
+        const res = await this.api.get('s', { params });
+        const html = res.data;
+        const $ = cheerio.load(html);
+        let scriptWithData = '';
+        $('script').each((_, el) => {
+          const text = $(el).html();
+          if (text.includes('let data =') && text.includes('"business_data":')) {
+            scriptWithData = text;
+          }
+        });
+        if (!scriptWithData) throw new Error('Script data tidak ditemukan.');
+
+        const match = scriptWithData.match(/let\s+data\s*=\s*(\{[\s\S]+?\});/);
+        if (!match) throw new Error('Data object tidak ditemukan.');
+
+        const dataCode = `data = ${match[1]}`;
+        const sandbox = {};
+        vm.createContext(sandbox);
+        vm.runInContext(dataCode, sandbox);
+
+        const fullData = sandbox.data;
+        const data = fullData?.business_data;
+        if (!data) throw new Error('Tidak ditemukan.');
+
+        const awemeInfos = data.map(entry => entry?.data?.aweme_info).filter(Boolean);
+        return awemeInfos;
+
+      } catch (e) {
+        throw e;
+      }
+    }
+  }
+
+  // Proses pencarian
+  try {
+    const douyin = new DouyinSearchPage();
+    const results = await douyin.search({ query: text });
+
+    if (!results.length) return Reply("Tidak ada hasil ditemukan.");
+
+    const teks = results.map((v, i) => {
+      const desc = v?.desc || 'Tanpa deskripsi';
+      const author = v?.author?.nickname || '-';
+      const url = `https://www.douyin.com/video/${v?.aweme_id}`;
+      return `🎥 *${i + 1}.*\n👤 Author: ${author}\n📝 Desc: ${desc}\n🔗 Link: ${url}`;
+    }).join('\n\n');
+
+    await dycoders.sendMessage(m.chat, { text: teks }, { quoted: m });
+
+  } catch (e) {
+    console.log(e);
+    Reply('Gagal mengambil hasil dari Douyin.');
+  }
 }
+break;
+
+
 case "blur": {
   if (!m.quoted) return m.reply(`Kirim/reply gambar dengan caption *${prefix + command} <level>*`);
 
