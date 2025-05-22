@@ -5,11 +5,7 @@
     "main": "index.js",
     "type": "commonjs",
     "scripts": {
-<<<<<<< HEAD
         "start": "node ./justmylib/index.js"
-=======
-        "start": "node ./start/index.js"
->>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
     },
     "keywords": [
         "DybotMd",
@@ -19,27 +15,19 @@
     "author": "dycoders.xyz",
     "license": "MIT",
     "dependencies": {
-<<<<<<< HEAD
-       "@adiwajshing/keyed-db": "^0.2.4",
-       "@colors/colors": "^1.5.0",
-       "@hapi/boom": "^10.0.0",
-     "@whiskeysockets/baileys": "npm:@fizzxydev/baileys-pro@^8.7.1",
-        "any-base": "^1.1.0",
-        "@google/generative-ai": "^0.24.0",
-=======
-          "@adiwajshing/keyed-db": "^0.2.4",
+        "@adiwajshing/keyed-db": "^0.2.4",
         "@colors/colors": "^1.5.0",
+        "@google/generative-ai": "^0.24.0",
         "@hapi/boom": "^10.0.0",
-        "@whiskeysockets/baileys": "npm:@fizzxydev/baileys-pro@latest",
+        "@whiskeysockets/baileys": "npm:@fizzxydev/baileys-pro@^8.7.1",
+        "adm-zip": "^0.5.10",
         "any-base": "^1.1.0",
->>>>>>> 8fbba646345562f12dba5275cb594510e4ce51bf
         "api-dylux": "^1.8.5",
         "awesome-phonenumber": "^2.70.0",
         "bing-translate-api": "^4.0.2",
         "btch-downloader": "^2.2.9",
+        "canvas": "^3.1.0",
         "cfonts": "^3.3.0",
-        "adm-zip": "^0.5.10",
-         "tar": "^6.1.11",
         "chalk": "^4.1.2",
         "child_process": "^1.0.2",
         "crypto": "^1.0.1",
@@ -71,6 +59,7 @@
         "soundcloud-downloader": "^1.0.0",
         "ssh2": "^1.14.0",
         "stream": "^0.0.3",
+        "tar": "^6.1.11",
         "translate-google-api": "^1.0.4",
         "util": "^0.12.4",
         "yt-search": "^2.12.1",
