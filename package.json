@@ -37,7 +37,7 @@
         "fs": "0.0.1-security",
         "fs-extra": "^10.0.0",
         "human-readable": "^0.2.1",
-        "jimp": "^0.16.1",
+        "jimp": "^0.22.12",
         "lodash": "^4.17.21",
         "moment-timezone": "^0.5.34",
         "ms": "^2.1.3",

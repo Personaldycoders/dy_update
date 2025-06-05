@@ -158,9 +158,7 @@ const dbPath = path.join(__dirname, './justmylib/lib/database/pendaftar.json');
 
 // Load database
 function loadDB() {
-    if (!fs.existsSync(dbPath)) {
-        fs.writeFileSync(dbPath, JSON.stringify([]));
-    }
+    if (!fs.existsSync(dbPath)) fs.writeFileSync(dbPath, JSON.stringify([]));
     return JSON.parse(fs.readFileSync(dbPath, 'utf8'));
 }
 
@@ -168,6 +166,8 @@ function loadDB() {
 function saveDB(db) {
     fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
 }
+
+// Ambil limit user
 function getLimit(sender) {
     let db = loadDB();
     let user = db.find(u => u.nomer === sender);
@@ -181,27 +181,27 @@ function getLimit(sender) {
     return user.limit;
 }
 
-// Kurangi limit
+
 function uselimit(sender) {
     let db = loadDB();
     let index = db.findIndex(u => u.nomer === sender);
-    let siowner = global.owner.includes(sender);
+    const siOwner = global.owner.includes(sender);
 
     if (index === -1) {
         db.push({ nomer: sender, nama: 'Unknown', limit: parseInt(global.limitawal) || 5 });
         index = db.length - 1;
     }
 
-    if (!siowner && db[index].limit > 0) {
+    if (!siOwner && db[index].limit > 0) {
         db[index].limit -= 1;
         saveDB(db);
-        return true; // berhasil dikurangi
+        return true;
     }
 
-    return false; // tidak bisa dikurangi (owner atau limit habis)
+    return false;
 }
 
-// Tambah limit
+// Tambah limit user
 function addLimit(sender, jumlah) {
     let db = loadDB();
     let index = db.findIndex(u => u.nomer === sender);
@@ -212,15 +212,11 @@ function addLimit(sender, jumlah) {
     }
 
     jumlah = parseInt(jumlah);
-    if (isNaN(jumlah)) {
-        console.log(`Error: jumlah limit bukan angka!`);
-        return;
-    }
+    if (isNaN(jumlah)) return;
 
     db[index].limit += jumlah;
     saveDB(db);
 }
-
 
 let limitnya = getLimit(sender);
 let limit = getLimit(m.sender);
@@ -850,6 +846,8 @@ Gunakan perintah yang tersedia untuk menikmati fitur terbaik!
 │ ⌬ .yts query 
 │ ⌬ .spam-ngl
 │ ⌬ .tiktoks
+│ ⌬ .soundcloudsearch
+│ ⌬ .freepik query
 ╰──────────────╯  
 
 ╭── DOWNLOAD MENU ──╮  
@@ -857,7 +855,8 @@ Gunakan perintah yang tersedia untuk menikmati fitur terbaik!
 │ ✶ .mediafire url  
 │ ✶ .git urlrepo  
 │ ✶ .yt url  
-│ ✶ .spotifydl url track  
+│ ✶ .spotifydl url track 
+| * .soundclouddl
 │ ✶ .ig/.instagram url  
 │ ✶ .npmd name  
 ╰──────────────╯  
@@ -4205,72 +4204,32 @@ case "ceklimit": {
     break;
 }
 
+case "lirik":
+case "lyrics": {
+    if (!text) return Reply("Masukkan judul lagu!\n*Contoh:* .lirik Someone Like You");
 
-case "lirik": case "lyrics": {
-    if (!text) return Reply("Masukkan judul lagu!\n*EX:* .lirik Someone Like You");
-
-    const cheerio = require("cheerio");
-
-    async function googleLyrics(judulLagu) {
-        try {
-            const response = await fetch(`https://r.jina.ai/https://www.google.com/search?q=lirik+lagu+${encodeURIComponent(judulLagu)}&hl=en`, {
-                headers: {
-                    "x-return-format": "html",
-                    "x-engine": "cf-browser-rendering",
-                }
-            });
-
-            const text = await response.text();
-            const $ = cheerio.load(text);
-            const lirik = [];
-            const output = [];
-            const result = {};
-            
-            $("div.PZPZlf").each((i, e) => {
-                const penemu = $(e).find('div[jsname="U8S5sf"]').text().trim();
-                if (!penemu) output.push($(e).text().trim());
-            });
-
-            $("div[jsname='U8S5sf']").each((i, el) => {
-                let out = "";
-                $(el).find("span[jsname='YS01Ge']").each((j, span) => {
-                    out += $(span).text() + "\n";
-                });
-                lirik.push(out.trim());
-            });
-
-            result.lyrics = lirik.join("\n\n");
-            result.title = output.shift();
-            result.subtitle = output.shift();
-            result.platform = output.filter(_ => !_.includes(":"));
-
-            output.forEach(_ => {
-                if (_.includes(":")) {
-                    const [name, value] = _.split(":");
-                    result[name.toLowerCase()] = value.trim();
-                }
-            });
-
-            return result;
-        } catch (error) {
-            return { error: error.message };
-        }
-    }
+    const Genius = require("genius-lyrics");
+    const Client = new Genius.Client(); // Tanpa API key
 
     try {
-        const res = await googleLyrics(text);
-        if (res.error) return Reply(`Error: ${res.error}`);
+        const searches = await Client.songs.search(text);
+        if (!searches.length) return Reply("Lagu tidak ditemukan.");
 
-        let pesan = `🎵 *Title:* ${res.title || "Unknown"}\n`;
-        pesan += `📌 *Subtitle:* ${res.subtitle || "Unknown"}\n\n`;
-        pesan += `📜 *Lyrics:*\n${res.lyrics || "Tidak ditemukan"}`;
+        const song = searches[0];
+        const lyrics = await song.lyrics();
+
+        let pesan = `🎵 *Judul:* ${song.fullTitle || "Tidak diketahui"}\n`;
+        pesan += `🌐 *URL:* ${song.url || "Tidak ada"}\n`;
+        pesan += `\n📜 *Lirik:*\n${lyrics || "Tidak ditemukan"}`;
 
         Reply(pesan);
-    } catch (error) {
+    } catch (e) {
+        console.error("Error saat ambil lirik:", e);
         Reply("Terjadi kesalahan saat mengambil lirik.");
     }
     break;
 }
+
 
 
 case 'subdomain5': {
@@ -5162,6 +5121,62 @@ uselimit(sender);
 break
 
 
+
+
+case "soundclouddl": {
+    if (!text) return Reply("Link SoundCloud-nya mana om?\nContoh:\nhttps://soundcloud.com/anakpungut-v/vancouver-sleep-clinic-someone");
+
+    try {
+        const response = await axios.get(`https://restapi.dycoders.xyz/api/soundcloud-down?url=${encodeURIComponent(text)}&apikey=dycoders`);
+
+        if (!response.data || !response.data.status) {
+            return Reply("Gagal mengambil data lagu dari SoundCloud.");
+        }
+
+        const { title, author, audio_url, thumbnail, duration } = response.data.result;
+
+        await dycoders.sendMessage(
+            m.chat,
+            {
+                text:
+                    "╭── 「 SoundCloud Download 」\n" +
+                    `│  • Judul: *${title}*\n` +
+                    `│  • Artis: *${author}*\n` +
+                    `│  • Durasi: *${duration}*\n` +
+                    `│  • Link: ${text}\n` +
+                    "╰───────────────",
+                contextInfo: {
+                    externalAdReply: {
+                        title: title,
+                        body: author,
+                        thumbnailUrl: thumbnail,
+                        sourceUrl: text,
+                        mediaType: 1,
+                    },
+                },
+            },
+            { quoted: m }
+        );
+
+        await dycoders.sendMessage(
+            m.chat,
+            {
+                audio: { url: audio_url },
+                mimetype: "audio/mpeg",
+                ptt: false,
+            },
+            { quoted: m }
+        );
+
+    } catch (error) {
+        console.error(error);
+        Reply("Terjadi kesalahan saat mengunduh lagu.");
+    }
+
+    break;
+}
+
+
 case 'remini': case 'hd': {
 if (limitnya < 1) return forbiden(mess.limit)
 dycoders.enhancer = dycoders.enhancer ? dycoders.enhancer : {};
@@ -5973,6 +5988,120 @@ case 'pinterest': {
 
     break;
 }
+case 'freepik': {
+    if (limitnya < 1) return forbiden(mess.limit);
+    if (!text) return Reply(`Contoh:\n${prefix + command} flower`);
+
+    reaction("⏳");
+
+    try {
+        let res = await axios.get(`https://restapi.dycoders.xyz/api/freepik/search?q=${encodeURIComponent(text)}&apikey=dycoders`);
+        if (!res.data.status || !res.data.result || res.data.result.length === 0) {
+            return Reply("Tidak ditemukan gambar dari Freepik.");
+        }
+
+        let selectedResults = res.data.result.slice(0, 5);
+        let cards = [];
+
+        for (let i = 0; i < selectedResults.length; i++) {
+            let data = selectedResults[i];
+
+            let media = await prepareWAMessageMedia(
+                { image: { url: data.previewUrl } },
+                { upload: dycoders.waUploadToServer }
+            );
+
+            cards.push({
+                header: proto.Message.InteractiveMessage.Header.fromObject({
+                    title: `Gambar ke *${i + 1}*`,
+                    hasMediaAttachment: true,
+                    ...media
+                }),
+                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                    buttons: [{
+                        name: "cta_url",
+                        buttonParamsJson: JSON.stringify({
+                            display_text: "Lihat di Freepik",
+                            url: data.url
+                        })
+                    }]
+                }),
+                footer: proto.Message.InteractiveMessage.Footer.create({
+                    text: `Author: ${data.author?.name || "Unknown"}`
+                })
+            });
+        }
+
+        const msg = await generateWAMessageFromContent(m.chat, {
+            viewOnceMessage: {
+                message: {
+                    messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                    interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+                        body: proto.Message.InteractiveMessage.Body.fromObject({
+                            text: `🔎 Berikut hasil pencarian gambar Freepik untuk *${text}*`
+                        }),
+                        carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
+                            cards: cards
+                        })
+                    })
+                }
+            }
+        }, {
+            userJid: sender,
+            quoted: m
+        });
+
+        dycoders.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
+
+        uselimit(sender);
+    } catch (err) {
+        console.error(err);
+        Reply("Terjadi kesalahan saat mengambil data dari Freepik.");
+    }
+
+    break;
+}
+
+case 'soundcloudsearch': {
+    if (limitnya < 1) return forbiden(mess.limit);
+    if (!text) return Reply(`Contoh:\n${prefix + command} lagu favorit`);
+
+    reaction("⏳");
+
+    try {
+        let res = await axios.get(`https://restapi.dycoders.xyz/api/soundcloud-search?q=${encodeURIComponent(text)}&apikey=dycoders`);
+        if (!res.data.status || !res.data.result || res.data.result.length === 0) {
+            return Reply("Tidak ditemukan hasil dari SoundCloud.");
+        }
+
+        let selectedResults = res.data.result.slice(0, 5);
+        let hasil = `🔍 *Hasil Pencarian SoundCloud untuk:* _${text}_\n\n`;
+
+        for (let i = 0; i < selectedResults.length; i++) {
+            let data = selectedResults[i];
+            hasil += `🎵 *${i + 1}. ${data.title}*\n`;
+            hasil += `👤 ${data.author.name}\n`;
+            hasil += `❤️ ${data.like_count} | ▶️ ${data.play_count}\n`;
+            hasil += `🔗 ${data.url}\n\n`;
+        }
+
+        Reply(hasil.trim());
+        uselimit(sender);
+    } catch (err) {
+        console.error(err);
+        Reply("Terjadi kesalahan saat mengambil data dari SoundCloud.");
+    }
+
+    break;
+}
+
+
+
+
+
+
+
+
 case 'customqris': {
     
     if (!text) return Reply(`Contoh:\n${prefix + command} <qrisData>|<nominal>\nContoh:\n${prefix + command} 0002010102...|10000`);
