@@ -12,6 +12,7 @@ const util = require("util");
 const path = require("path")
 const moment = require("moment-timezone");
 const sharp = require('sharp');
+const CryptoJs = require("crypto-js");
 
 const { createCanvas, loadImage, registerFont } = require('canvas');
 registerFont('./justmylib/lib/Impact.ttf', { family: 'Impact' });
@@ -283,6 +284,61 @@ function tiktoks(query) {
     }
   });
 }
+
+const allinonedownloader = async (url) => {
+    if (url.includes("youtube"))
+        return { msg: "Youtube Not Supported!" };
+
+    async function getTokens() {
+        const response = await fetch("https://allinonedownloader.com/", {
+            headers: { "User-Agent": "Mozilla/5.0" },
+        });
+        const html = await response.text();
+        const $ = cheerio.load(html);
+        const rawCookie = response.headers.get("set-cookie") || "";
+
+        return {
+            token: $("#token").val(),
+            urls: $("#scc").val(),
+            cookie: rawCookie,
+        };
+    }
+
+    async function generateHash(url, token) {
+        const keys = CryptoJs.enc.Hex.parse(token);
+        const ivs = CryptoJs.enc.Hex.parse("afc4e290725a3bf0ac4d3ff826c43c10");
+        const enc = CryptoJs.AES.encrypt(url, keys, {
+            iv: ivs,
+            padding: CryptoJs.pad.ZeroPadding,
+        });
+        return enc.toString();
+    }
+
+    const tokens = await getTokens();
+    const { urls: paths, cookie, token } = tokens;
+    const hashResult = await generateHash(url, token);
+
+    const form = new FormData();
+    form.append("url", url);
+    form.append("urlhash", hashResult);
+    form.append("token", token);
+
+    const response = await fetch(`https://allinonedownloader.com${paths}`, {
+        method: "POST",
+        headers: {
+            ...form.getHeaders(),
+            Cookie: cookie,
+            Origin: "https://allinonedownloader.com",
+            Referer: "https://allinonedownloader.com/",
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
+            "X-Requested-With": "XMLHttpRequest",
+        },
+        body: form,
+    });
+
+    const json = await response.json();
+    return json;
+};
 
 async function pinterest(query) {
     try {
@@ -3237,6 +3293,78 @@ case "installblueprint": {
     }).connect(connSettings);
 }
 break;
+case "ig":
+case "instagram": {
+    if (!text) return Reply("Masukkan URL Instagram!");
+
+    const snapins = async (urlIgPost) => {
+        const headers = {
+            "content-type": "application/x-www-form-urlencoded",
+        };
+
+        const response = await fetch("https://snapins.ai/action.php", {
+            method: "POST",
+            headers,
+            body: "url=" + encodeURIComponent(urlIgPost),
+        });
+
+        if (!response.ok) throw new Error(`Gagal download info. ${response.status} ${response.statusText}`);
+
+        const json = await response.json();
+
+        const name = json.data?.[0]?.author?.name || "(no name)";
+        const username = json.data?.[0]?.author?.username || "(no username)";
+
+        let images = [], videos = [];
+
+        json.data.forEach(v => {
+            if (v.type === "image") images.push(v.imageUrl);
+            else if (v.type === "video") videos.push(v.videoUrl);
+        });
+
+        return { name, username, images, videos };
+    };
+
+    try {
+        const result = await snapins(text);
+        if (!result.images.length && !result.videos.length) {
+            return Reply("Tidak ada media yang ditemukan dari link tersebut.");
+        }
+
+        let caption = `📥 *Instagram Download*\n`;
+        caption += `👤 *Nama:* ${result.name}\n`;
+        caption += `🔰 *Username:* @${result.username}\n`;
+        caption += `📸 *Gambar:* ${result.images.length}\n🎥 *Video:* ${result.videos.length}\n`;
+        caption += `🔗 *Link:* ${text}`;
+
+        let first = true;
+
+        for (let url of result.images) {
+            await dycoders.sendMessage(m.chat, {
+                image: { url },
+                caption: first ? caption : ''
+            }, { quoted: m });
+            first = false;
+        }
+
+        for (let url of result.videos) {
+            await dycoders.sendMessage(m.chat, {
+                video: { url },
+                caption: first ? caption : ''
+            }, { quoted: m });
+            first = false;
+        }
+    } catch (err) {
+        console.error(err);
+        Reply("Terjadi kesalahan saat mengambil media.");
+    }
+}
+break;
+
+
+
+
+
 
 
 case 'listsrv-v2': { 
@@ -4953,39 +5081,6 @@ await dycoders.groupParticipantsUpdate(m.chat, [users], 'remove')
 await Reply(`Succes Kick anomali`)
 }
 break
-case "ig":
-case "instagram": {
-    if (!text) return Reply("Masukkan URL Instagram!");
-
-    try {
-        const response = await axios.get(`https://fgsi1-restapi.hf.space/api/downloader/instagram?url=${encodeURIComponent(text)}`);
-        const json = response.data;
-
-        if (!json.status || !json.data || !json.data.url || json.data.url.length === 0) {
-            return Reply("Gagal mendapatkan media dari API.");
-        }
-
-        let caption = `👤 *Username:* ${json.data.meta?.username || "Unknown"}\n`;
-        caption += `❤️ *Like:* ${json.data.meta?.like_count || 0} | 💬 *Comment:* ${json.data.meta?.comment_count || 0}\n`;
-        caption += `📝 *Caption:* ${json.data.meta?.title || "-"}\n`;
-        caption += `🔗 *Link:* ${json.data.meta?.source || text}`;
-
-        for (let i = 0; i < json.data.url.length; i++) {
-            const media = json.data.url[i];
-            const isVideo = media.type === "mp4";
-
-            await dycoders.sendMessage(m.chat, {
-                [isVideo ? 'video' : 'image']: { url: media.url },
-                caption: i === 0 ? caption : ''
-            }, { quoted: m });
-        }
-    } catch (err) {
-        console.error(err);
-        Reply("Terjadi kesalahan saat mengakses API.");
-    }
-}
-break;
-
 
 case "spotifydl": {
     if (!text) return Reply("Linknya mana om?\nEX: https://open.spotify.com/xxxxxxx");
