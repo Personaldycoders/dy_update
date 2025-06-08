@@ -155,21 +155,26 @@ if (!m.key.fromMe && global.autoread) {
  }
         dycoders.sendPresenceUpdate('available', m.chat)
 
+
 const dbPath = path.join(__dirname, './justmylib/lib/database/pendaftar.json');
 
-// Load database
+
+function normalize(nomer) {
+    return nomer.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+}
+
+
 function loadDB() {
     if (!fs.existsSync(dbPath)) fs.writeFileSync(dbPath, JSON.stringify([]));
     return JSON.parse(fs.readFileSync(dbPath, 'utf8'));
 }
 
-// Simpan database
+
 function saveDB(db) {
     fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
 }
-
-// Ambil limit user
 function getLimit(sender) {
+    sender = normalize(sender);
     let db = loadDB();
     let user = db.find(u => u.nomer === sender);
 
@@ -182,15 +187,16 @@ function getLimit(sender) {
     return user.limit;
 }
 
-
 function uselimit(sender) {
-    let db = loadDB();
-    let index = db.findIndex(u => u.nomer === sender);
-    const siOwner = global.owner.includes(sender);
+    sender = normalize(sender);
+    const db = loadDB();
+    const index = db.findIndex(u => u.nomer === sender);
+    const siOwner = global.owner.includes(sender); 
 
     if (index === -1) {
         db.push({ nomer: sender, nama: 'Unknown', limit: parseInt(global.limitawal) || 5 });
-        index = db.length - 1;
+        saveDB(db);
+        return true;
     }
 
     if (!siOwner && db[index].limit > 0) {
@@ -202,8 +208,8 @@ function uselimit(sender) {
     return false;
 }
 
-// Tambah limit user
 function addLimit(sender, jumlah) {
+    sender = normalize(sender);
     let db = loadDB();
     let index = db.findIndex(u => u.nomer === sender);
 
@@ -218,6 +224,7 @@ function addLimit(sender, jumlah) {
     db[index].limit += jumlah;
     saveDB(db);
 }
+
 
 let limitnya = getLimit(sender);
 let limit = getLimit(m.sender);
@@ -339,6 +346,64 @@ const allinonedownloader = async (url) => {
     const json = await response.json();
     return json;
 };
+
+async function quotedLyo(teks, name, profile, replynya, color = '#FFFFFF') {
+	return new Promise(async (resolve, reject) => {
+		const { url, options, reply } = replynya || {};
+		const payload = {
+			type: 'quote',
+			format: 'png',
+			backgroundColor: color,
+			width: 512,
+			height: 768,
+			scale: 2,
+			messages: [{
+				entities: [],
+				...(url ? { media: { url } } : {}),
+				avatar: true,
+				from: {
+					id: 1,
+					name,
+					photo: {
+						url: profile
+					}
+				},
+				...(options ? options : {}),
+				text: teks,
+				replyMessage: reply ? {
+					name: reply.name || '',
+					text: reply.text || '',
+					chatId: Math.floor(Math.random() * 9999999)
+				} : {},
+			}]
+		};
+		const urls = [
+			'https://quotly.netorare.codes/generate',
+			'https://btzqc.betabotz.eu.org/generate',
+			'https://qc.botcahx.eu.org/generate',
+			'https://bot.lyo.su/quote/generate'
+		];
+		for (let url of urls) {
+			try {
+				const { data } = await axios.post(url, JSON.stringify(payload, null, 2), {
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				});
+				if (data && typeof data.result === 'string' && data.result.startsWith('http')) {
+					return resolve(data);
+				}
+			} catch (e) {
+				// lanjut ke URL berikutnya
+			}
+		}
+		reject(new Error('Semua endpoint quote gagal atau tidak valid'));
+	});
+}
+
+
+
+
 
 async function pinterest(query) {
     try {
@@ -904,6 +969,7 @@ Gunakan perintah yang tersedia untuk menikmati fitur terbaik!
 │ ⌬ .tiktoks
 │ ⌬ .soundcloudsearch
 │ ⌬ .freepik query
+│ ⌬ .removebg qouted
 ╰──────────────╯  
 
 ╭── DOWNLOAD MENU ──╮  
@@ -911,8 +977,8 @@ Gunakan perintah yang tersedia untuk menikmati fitur terbaik!
 │ ✶ .mediafire url  
 │ ✶ .git urlrepo  
 │ ✶ .yt url  
-│ ✶ .spotifydl url track 
-| * .soundclouddl
+│ ✶ .spotifydl url track
+│ ✶ .soundclouddl url
 │ ✶ .ig/.instagram url  
 │ ✶ .npmd name  
 ╰──────────────╯  
@@ -956,6 +1022,38 @@ const menunya = `
 
 
 switch (command) {
+case 'removebg': {
+   let q = m.quoted ? m.quoted : m
+   let mime = (q.msg || q).mimetype || ''
+   if (!mime.startsWith('image/')) return m.reply('Mana Gambar Nya')
+
+   let buffer = await q.download()
+   let base64 = `data:${mime};base64,${buffer.toString('base64')}`
+
+   let { data } = await axios.post('https://background-remover.com/removeImageBackground', {
+      encodedImage: base64,
+      title: `Fiony-${Math.floor(Math.random() * 99999)}.${mime.split('/')[1] || 'jpg'}`,
+      mimeType: mime
+   }, {
+      headers: {
+         'accept': '*/*',
+         'content-type': 'application/json; charset=utf-8',
+         'referer': 'https://background-remover.com/upload'
+      }
+   })
+
+   let result = data.encodedImageWithoutBackground?.split(',')[1]
+   await dycoders.sendMessage(m.chat, {
+      image: Buffer.from(result, 'base64')
+   }, { quoted: m })
+}
+break;
+
+
+
+
+
+
 
 case 'brat': {
 if (limitnya < 1) return forbiden(mess.limit);
@@ -6474,34 +6572,37 @@ await dycoders.sendMessage(m.sender, {text: jsonData}, {quoted:m})
 await dycoders.sendMessage(m.chat, { react: { text: "📝",key: m.key,}})
 }
 break;
+
 case 'qc': {
-  if (limitnya < 1) return forbiden(mess.limit)
+  if (limitnya < 1) return forbiden(mess.limit);
+  try {
+    let teks = text ? text : m.quoted && m.quoted.text ? m.quoted.text : m.text;
+    if (!teks) return Reply(`Example: ${prefix + command} <Reply/Input Text>`);
+
+    let ppuser;
     try {
-     
-        let teks = text ? text : m.quoted && m.quoted.text ? m.quoted.text : m.text;
-        if (!teks) return Reply(`Example: ${prefix + command} <Reply/Input Text>`);
-
-      
-        let ppuser;
-        try {
-            ppuser = await dycoders.profilePictureUrl(m.sender, 'image');
-        } catch {
-            ppuser = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png?q=60'; 
-        }
-
-       
-        const res = await (teks, ppuser, pushname);
-        await dycoders.sendImageAsSticker(m.chat, res, m, {
-            packname: `${global.packname}`,
-            author: `${global.siowner}`
-        });
-    } catch (err) {
-        console.error(err);
-        Reply('Terjadi kesalahan saat membuat sticker.');
+      ppuser = await dycoders.profilePictureUrl(m.sender, 'image');
+    } catch {
+      ppuser = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png?q=60';
     }
-    uselimit(sender);
-    break;
+
+    const res = await quotedLyo(teks, pushname, ppuser);
+    const { data } = await axios.get(res.result, { responseType: 'arraybuffer' });
+await dycoders.sendImageAsSticker(m.chat, Buffer.from(data), m, {
+
+      packname: global.packname,
+      author: global.siowner
+    });
+
+  } catch (err) {
+    console.error(err);
+    Reply('Terjadi kesalahan saat membuat sticker.');
+  }
+  uselimit(sender);
+  break;
 }
+
+
 
  case 'toimg': {
  if (!quoted) reply ('m?.reply Image')
@@ -7115,22 +7216,19 @@ Reply(`Error`)
 }
 break
 
-
 case 'addlimit': {
     if (!siowner) return Reply(mess.owner);
-    let [nomor, jumlah] = text.split(',');
 
+    let [nomor, jumlah] = text.split(',');
     if (!nomor || !jumlah) return Reply('Contoh: .addlimit 628xxx,10');
 
-    nomor = nomor.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
     jumlah = parseInt(jumlah);
-
     if (isNaN(jumlah)) return Reply('Jumlah harus angka!');
-    
 
-    addLimit(nomor, jumlah);
-    Reply(`✅ Berhasil menambahkan ${jumlah} limit ke ${nomor}!`);
-    
+    const fullJid = normalize(nomor);
+    addLimit(fullJid, jumlah);
+
+    Reply(`✅ Berhasil menambahkan ${jumlah} limit ke ${fullJid}!`);
     break;
 }
 
