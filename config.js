@@ -45,43 +45,6 @@ global.wmbot = "dycoders.xyz"
 global.saluran = "120363303267333730@newsletter"
 global.idgc = "120363248826862499@g.us"
 
-// CF SETTINGS
-global.ApiDns = 'UKl7YY-oTmuwL8kRKbwqhh6WSDK4VrWddvjdNKYJ'
-global.ApiRules = 'GCc7rb_FZkD9S9UsV0Kelb1QSITo13HkGR46c_wt'
-global.AccountId = '284c26430d8353d124756e4051dbf51d'
-
-// CF SETTINGS 2 - 8
-global.zoneid2 = '47afe9f1a5e9584ce6455b7f6f54010f'
-global.ApiDns2 = 'UKl7YY-oTmuwL8kRKbwqhh6WSDK4VrWddvjdNKYJ'
-
-global.zoneid3 = 'c2b8651f9d970f4c0b213f3a711c5be6'
-global.ApiDns3 = 'UKl7YY-oTmuwL8kRKbwqhh6WSDK4VrWddvjdNKYJ'
-
-global.zoneid4 = '6f9d2650dadf4c3110ef55382d9b5878'
-global.AccountId2 = '7e975bdfaa66d26785827a486d09f52e'
-global.ApiDns4 = 'czHbwD26uv7x3pEK1uv2XDPIoAFY7cpn5MVPHOoo'
-
-global.zoneid5 = '372d436604ee728acdfa05c4c306ec3d'
-global.ApiDns5 = 'UKl7YY-oTmuwL8kRKbwqhh6WSDK4VrWddvjdNKYJ'
-
-global.zoneid6 = '0ea2d7e5371d912a128f0888bab30f81'
-global.ApiDns6 = 'UKl7YY-oTmuwL8kRKbwqhh6WSDK4VrWddvjdNKYJ'
-
-global.zoneid7 = 'b6651dff70249985371a35b8bb71806a'
-global.ApiDns7 = 'UKl7YY-oTmuwL8kRKbwqhh6WSDK4VrWddvjdNKYJ'
-
-global.zoneid8 = 'd76fefc63929c12685e02c71a27f63bc'
-global.ApiDns8 = 'UKl7YY-oTmuwL8kRKbwqhh6WSDK4VrWddvjdNKYJ'
-
-// Domain settings
-global.domain2 = 'mycloudpremiumid.xyz'
-global.domain3 = 'serverku-pterodactyl.web.id'
-global.domain4 = 'pterodactyl-host.xyz'
-global.wings = 'node-i.my.id'
-global.domain6 = 'cloud-ku.my.id'
-global.domain7 = 'panel-i.biz.id'
-global.domain8 = 'premium-host.biz.id'
-
 global.limitawal = "10"
 
 let file = require.resolve(__filename)
