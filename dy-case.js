@@ -186,12 +186,13 @@ function getLimit(sender) {
 
     return user.limit;
 }
-
 function uselimit(sender) {
     sender = normalize(sender);
     const db = loadDB();
     const index = db.findIndex(u => u.nomer === sender);
-    const siOwner = global.owner.includes(sender); 
+
+    
+    const isBot = sender === normalize(dycoders.user.id);
 
     if (index === -1) {
         db.push({ nomer: sender, nama: 'Unknown', limit: parseInt(global.limitawal) || 5 });
@@ -199,13 +200,14 @@ function uselimit(sender) {
         return true;
     }
 
-    if (!siOwner && db[index].limit > 0) {
+    if (!siowner && !isBot && db[index].limit > 0) {
         db[index].limit -= 1;
         saveDB(db);
         return true;
     }
 
-    return false;
+   
+    return siowner || isBot;
 }
 
 function addLimit(sender, jumlah) {
@@ -346,64 +348,6 @@ const allinonedownloader = async (url) => {
     const json = await response.json();
     return json;
 };
-
-async function quotedLyo(teks, name, profile, replynya, color = '#FFFFFF') {
-	return new Promise(async (resolve, reject) => {
-		const { url, options, reply } = replynya || {};
-		const payload = {
-			type: 'quote',
-			format: 'png',
-			backgroundColor: color,
-			width: 512,
-			height: 768,
-			scale: 2,
-			messages: [{
-				entities: [],
-				...(url ? { media: { url } } : {}),
-				avatar: true,
-				from: {
-					id: 1,
-					name,
-					photo: {
-						url: profile
-					}
-				},
-				...(options ? options : {}),
-				text: teks,
-				replyMessage: reply ? {
-					name: reply.name || '',
-					text: reply.text || '',
-					chatId: Math.floor(Math.random() * 9999999)
-				} : {},
-			}]
-		};
-		const urls = [
-			'https://quotly.netorare.codes/generate',
-			'https://btzqc.betabotz.eu.org/generate',
-			'https://qc.botcahx.eu.org/generate',
-			'https://bot.lyo.su/quote/generate'
-		];
-		for (let url of urls) {
-			try {
-				const { data } = await axios.post(url, JSON.stringify(payload, null, 2), {
-					headers: {
-						'Content-Type': 'application/json'
-					}
-				});
-				if (data && typeof data.result === 'string' && data.result.startsWith('http')) {
-					return resolve(data);
-				}
-			} catch (e) {
-				// lanjut ke URL berikutnya
-			}
-		}
-		reject(new Error('Semua endpoint quote gagal atau tidak valid'));
-	});
-}
-
-
-
-
 
 async function pinterest(query) {
     try {
@@ -6576,7 +6520,7 @@ break;
 case 'qc': {
   if (limitnya < 1) return forbiden(mess.limit);
   try {
-    let teks = text ? text : m.quoted && m.quoted.text ? m.quoted.text : m.text;
+    const teks = text ? text : m.quoted && m.quoted.text ? m.quoted.text : m.text;
     if (!teks) return Reply(`Example: ${prefix + command} <Reply/Input Text>`);
 
     let ppuser;
@@ -6586,10 +6530,39 @@ case 'qc': {
       ppuser = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png?q=60';
     }
 
-    const res = await quotedLyo(teks, pushname, ppuser);
-    const { data } = await axios.get(res.result, { responseType: 'arraybuffer' });
-await dycoders.sendImageAsSticker(m.chat, Buffer.from(data), m, {
+    const json = {
+      "type": "quote",
+      "format": "png",
+      "backgroundColor": "#000000",
+      "width": 512,
+      "height": 768,
+      "scale": 2,
+      "messages": [
+        {
+          "entities": [],
+          "avatar": true,
+          "from": {
+            "id": 1,
+            "name": pushname,
+            "photo": {
+              "url": ppuser,
+            }
+          },
+          "text": teks,
+          "replyMessage": {}
+        }
+      ]
+    };
 
+    const res = await axios.post('https://bot.lyo.su/quote/generate', json, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!res.data?.result?.image) return Reply('Gagal membuat quote.');
+
+    const buffer = Buffer.from(res.data.result.image, 'base64');
+
+    await dycoders.sendImageAsSticker(m.chat, buffer, m, {
       packname: global.packname,
       author: global.siowner
     });
